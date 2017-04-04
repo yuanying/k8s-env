@@ -1,0 +1,124 @@
+---
+nodeExporter:
+  extraArgs:
+    "collector.textfile.directory": "/srv/txt_collector"
+  extraHostPathMounts:
+    - name: textfile-dir
+      mountPath: /srv/txt_collector
+      hostPath: /var/lib/node-exporter
+      readOnly: true
+server:
+  persistentVolume:
+    enabled: false
+  service:
+    type: NodePort
+alertmanager:
+  persistentVolume:
+    enabled: false
+serverFiles:
+  alerts: |-
+    ALERT SMARTMON_AIRFLOW_TEMPERATURE_CEL_INVALID
+      IF smartmon_airflow_temperature_cel_threshold - smartmon_airflow_temperature_cel_value > 0
+      FOR 30s
+      ANNOTATIONS {
+        summary = "Abnormal state of smartmon_airflow_temperature_cel_value",
+        description = "Abnormal state on {{$labels.instance}} for disk {{$labels.name}} (current value: {{$value}})"
+      }
+    ALERT SMARTMON_COMMAND_TIMEOUT_INVALID
+      IF smartmon_command_timeout_threshold - smartmon_command_timeout_value > 0
+      FOR 30s
+      ANNOTATIONS {
+        summary = "Abnormal state of smartmon_command_timeout_value",
+        description = "Abnormal state on {{$labels.instance}} for disk {{$labels.name}} (current value: {{$value}})"
+      }
+    ALERT SMARTMON_CURRENT_PENDING_SECTOR_INVALID
+      IF smartmon_current_pending_sector_threshold - smartmon_current_pending_sector_value > 0
+      FOR 30s
+      ANNOTATIONS {
+        summary = "Abnormal state of smartmon_current_pending_sector_value",
+        description = "Abnormal state on {{$labels.instance}} for disk {{$labels.name}} (current value: {{$value}})"
+      }
+    ALERT SMARTMON_END_TO_END_ERROR_INVALID
+      IF smartmon_end_to_end_error_threshold - smartmon_end_to_end_error_value > 0
+      FOR 30s
+      ANNOTATIONS {
+        summary = "Abnormal state of smartmon_end_to_end_error_value",
+        description = "Abnormal state on {{$labels.instance}} for disk {{$labels.name}} (current value: {{$value}})"
+      }
+    ALERT SMARTMON_LOAD_CYCLE_COUNT_INVALID
+      IF smartmon_load_cycle_count_threshold - smartmon_load_cycle_count_value > 0
+      FOR 30s
+      ANNOTATIONS {
+        summary = "Abnormal state of smartmon_load_cycle_count_value",
+        description = "Abnormal state on {{$labels.instance}} for disk {{$labels.name}} (current value: {{$value}})"
+      }
+    ALERT SMARTMON_OFFLINE_UNCORRECTABLE_INVALID
+      IF smartmon_offline_uncorrectable_threshold - smartmon_offline_uncorrectable_value > 0
+      FOR 30s
+      ANNOTATIONS {
+        summary = "Abnormal state of smartmon_offline_uncorrectable_value",
+        description = "Abnormal state on {{$labels.instance}} for disk {{$labels.name}} (current value: {{$value}})"
+      }
+    ALERT SMARTMON_POWER_CYCLE_COUNT_INVALID
+      IF smartmon_power_cycle_count_threshold - smartmon_power_cycle_count_value > 0
+      FOR 30s
+      ANNOTATIONS {
+        summary = "Abnormal state of smartmon_power_cycle_count_value",
+        description = "Abnormal state on {{$labels.instance}} for disk {{$labels.name}} (current value: {{$value}})"
+      }
+    ALERT SMARTMON_POWER_ON_HOURS_INVALID
+      IF smartmon_power_on_hours_threshold - smartmon_power_on_hours_value > 0
+      FOR 30s
+      ANNOTATIONS {
+        summary = "Abnormal state of smartmon_power_on_hours_value",
+        description = "Abnormal state on {{$labels.instance}} for disk {{$labels.name}} (current value: {{$value}})"
+      }
+    ALERT SMARTMON_RAW_READ_ERROR_RATE_INVALID
+      IF smartmon_raw_read_error_rate_threshold - smartmon_raw_read_error_rate_value > 0
+      FOR 30s
+      ANNOTATIONS {
+        summary = "Abnormal state of smartmon_raw_read_error_rate_value",
+        description = "Abnormal state on {{$labels.instance}} for disk {{$labels.name}} (current value: {{$value}})"
+      }
+    ALERT SMARTMON_REALLOCATED_SECTOR_CT_INVALID
+      IF smartmon_reallocated_sector_ct_threshold - smartmon_reallocated_sector_ct_value > 0
+      FOR 30s
+      ANNOTATIONS {
+        summary = "Abnormal state of smartmon_reallocated_sector_ct_value",
+        description = "Abnormal state on {{$labels.instance}} for disk {{$labels.name}} (current value: {{$value}})"
+      }
+    ALERT SMARTMON_REPORTED_UNCORRECT_INVALID
+      IF smartmon_reported_uncorrect_threshold - smartmon_reported_uncorrect_value > 0
+      FOR 30s
+      ANNOTATIONS {
+        summary = "Abnormal state of smartmon_reported_uncorrect_value",
+        description = "Abnormal state on {{$labels.instance}} for disk {{$labels.name}} (current value: {{$value}})"
+      }
+    ALERT SMARTMON_SPIN_RETRY_COUNT_INVALID
+      IF smartmon_spin_retry_count_threshold - smartmon_spin_retry_count_value > 0
+      FOR 30s
+      ANNOTATIONS {
+        summary = "Abnormal state of smartmon_spin_retry_count_value",
+        description = "Abnormal state on {{$labels.instance}} for disk {{$labels.name}} (current value: {{$value}})"
+      }
+    ALERT SMARTMON_SPIN_UP_TIME_INVALID
+      IF smartmon_spin_up_time_threshold - smartmon_spin_up_time_value > 0
+      FOR 30s
+      ANNOTATIONS {
+        summary = "Abnormal state of smartmon_spin_up_time_value",
+        description = "Abnormal state on {{$labels.instance}} for disk {{$labels.name}} (current value: {{$value}})"
+      }
+    ALERT SMARTMON_START_STOP_COUNT_INVALID
+      IF smartmon_start_stop_count_threshold - smartmon_start_stop_count_value > 0
+      FOR 30s
+      ANNOTATIONS {
+        summary = "Abnormal state of smartmon_start_stop_count_value",
+        description = "Abnormal state on {{$labels.instance}} for disk {{$labels.name}} (current value: {{$value}})"
+      }
+    ALERT SMARTMON_UDMA_CRC_ERROR_COUNT_INVALID
+      IF smartmon_udma_crc_error_count_threshold - smartmon_udma_crc_error_count_value > 0
+      FOR 30s
+      ANNOTATIONS {
+        summary = "Abnormal state of smartmon_udma_crc_error_count_value",
+        description = "Abnormal state on {{$labels.instance}} for disk {{$labels.name}} (current value: {{$value}})"
+      }

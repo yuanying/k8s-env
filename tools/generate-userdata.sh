@@ -3,9 +3,9 @@
 set -eu
 export LC_ALL=C
 
-export NODE_OS_DISTRO=${1:-'ubuntu'}
-export NODE_HOSTNAME=${2:-'master'}
-export NODE_ADDRESS=${3:-'192.168.203.11'}
+export NODE_OS_DISTRO=${NODE_OS_DISTRO:-'ubuntu'}
+export NODE_HOSTNAME=${NODE_HOSTNAME:-'master'}
+export NODE_ADDRESS=${NODE_ADDRESS:-'192.168.203.11'}
 
 export NODE_NETWORK_RANGE=${NODE_NETWORK_RANGE:-'24'}
 export NODE_PUBLIC_KEY=${NODE_PUBLIC_KEY:-'auto'}

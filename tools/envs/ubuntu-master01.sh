@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 
-set -eu
-export LC_ALL=C
-
-script_dir=`dirname $0`
+script_dir=$(dirname "${BASH_SOURCE}")
 
 export NODE_HOSTNAME='master01'
 export NODE_ADDRESS='192.168.203.11'

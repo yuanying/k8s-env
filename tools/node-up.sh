@@ -3,42 +3,43 @@
 set -eu
 export LC_ALL=C
 
-HOST=${HOST:-$1}
-CPU=${CPU:-'2'}
-MEMORY=${MEMORY:-'2048'}
-DISK=${DISK:-'40'}
-ADDITIONAL_DISKS=${ADDITIONAL_DISKS:-'10'}
-NETWORK_BRIDGE=${NETWORK_BRIDGE:-'br0'}
-LIBVIRT_PATH=${LIBVIRT_PATH:-'/var/lib/libvirt/images'}
-IMAGE=${IMAGE:-'/var/lib/libvirt/images/ubuntu-xenial-docker-ec2-noclouds.qcow2'}
-USERDATA=${USERDATA:-'~/cloud.yaml'}
+NODE_HOST=${NODE_HOST:-$1}
+NODE_CPU=${NODE_CPU:-'2'}
+NODE_MEMORY=${NODE_MEMORY:-'2048'}
+NODE_DISK=${NODE_DISK:-'40'}
+NODE_ADDITIONAL_DISKS=${NODE_ADDITIONAL_DISKS:-'10'}
+NODE_NETWORK_HOST_BRIDGE=${NODE_NETWORK_HOST_BRIDGE:-'br0'}
+NODE_IMAGE=${NODE_IMAGE:-'/var/lib/libvirt/images/ubuntu-xenial-docker-ec2-noclouds.qcow2'}
+NODE_USERDATA=${NODE_USERDATA:-'~/cloud.yaml'}
 
+
+LIBVIRT_PATH=${LIBVIRT_PATH:-'/var/lib/libvirt/images'}
 if [ ! -d ${LIBVIRT_PATH} ]; then
     sudo mkdir -p ${LIBVIRT_PATH} || (echo "Can not create ${LIBVIRT_PATH} directory" && exit 1)
 fi
 
 
-echo "Setup USERDATA: ${HOST} node..."
+echo "Setup USERDATA: ${NODE_HOST} node..."
 
-USERDATA_DIR_PATH=${LIBVIRT_PATH}/${HOST}/openstack/latest
+USERDATA_DIR_PATH=${LIBVIRT_PATH}/${NODE_HOST}/openstack/latest
 if [ ! -d ${USERDATA_DIR_PATH} ]; then
     sudo mkdir -p ${USERDATA_DIR_PATH} || (echo "Can not create ${USERDATA_DIR_PATH} directory" && exit 1)
 fi
-sudo cp ${USERDATA} ${USERDATA_DIR_PATH}/user_data
-USERDATA_DISK="--filesystem ${LIBVIRT_PATH}/$HOST/,config-2,type=mount,mode=squash"
+sudo cp ${NODE_USERDATA} ${USERDATA_DIR_PATH}/user_data
+USERDATA_DISK="--filesystem ${LIBVIRT_PATH}/$NODE_HOST/,config-2,type=mount,mode=squash"
 
 
-echo "Creating: ${HOST} node..."
+echo "Creating: ${NODE_HOST} node..."
 
-if [ ! -f ${LIBVIRT_PATH}/${HOST}.qcow2 ]; then
-    sudo cp ${IMAGE} ${LIBVIRT_PATH}/${HOST}.qcow2
-    sudo qemu-img resize ${LIBVIRT_PATH}/${HOST}.qcow2 ${DISK}G
+if [ ! -f ${LIBVIRT_PATH}/${NODE_HOST}.qcow2 ]; then
+    sudo cp ${NODE_IMAGE} ${LIBVIRT_PATH}/${NODE_HOST}.qcow2
+    sudo qemu-img resize ${LIBVIRT_PATH}/${NODE_HOST}.qcow2 ${NODE_DISK}G
 fi
 dev_index='b'
 additional_disk=''
 additional_disk_params=''
-for disk_size in ${ADDITIONAL_DISKS}; do
-    additional_disk=${LIBVIRT_PATH}/${HOST}-vd${dev_index}.img
+for disk_size in ${NODE_ADDITIONAL_DISKS}; do
+    additional_disk=${LIBVIRT_PATH}/${NODE_HOST}-vd${dev_index}.img
     if [ ! -f ${additional_disk} ]; then
         sudo qemu-img create ${additional_disk} ${disk_size}G
     fi
@@ -48,13 +49,13 @@ done
 
 sudo virt-install --connect qemu:///system \
              --import \
-             --name ${HOST} \
-             --ram ${MEMORY} \
-             --vcpus ${CPUS} \
-             --network bridge=${NETWORK_BRIDGE} \
+             --name ${NODE_HOST} \
+             --ram ${NODE_MEMORY} \
+             --vcpus ${NODE_CPU} \
+             --network bridge=${NODE_NETWORK_HOST_BRIDGE} \
              --os-type=linux \
              --os-variant=virtio26 \
-             --disk path=${LIBVIRT_PATH}/${HOST}.qcow2,format=qcow2,bus=virtio \
+             --disk path=${LIBVIRT_PATH}/${NODE_HOST}.qcow2,format=qcow2,bus=virtio \
              ${additional_disk_params} \
              ${USERDATA_DISK} \
              --vnc \

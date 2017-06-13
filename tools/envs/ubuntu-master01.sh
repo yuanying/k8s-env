@@ -10,4 +10,4 @@ export NODE_NETWORK_RANGE='16'
 export NODE_NET_DEVICE='ens3'
 
 export NODE_ADDITIONAL_DISKS=''
-export NODE_USERDATA=${script_dir}/userdata/master01.yaml
+export NODE_USERDATA=${script_dir}/../userdata/ubuntu-master01.yaml

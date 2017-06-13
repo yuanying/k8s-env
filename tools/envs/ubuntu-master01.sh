@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-script_dir=$(dirname "${BASH_SOURCE}")
+env_dir=$(dirname "${BASH_SOURCE}")
 
 export NODE_HOSTNAME='ubuntu-master01'
 export NODE_ADDRESS='192.168.201.11'
@@ -10,4 +10,4 @@ export NODE_NETWORK_RANGE='16'
 export NODE_NET_DEVICE='ens3'
 
 export NODE_ADDITIONAL_DISKS=''
-export NODE_USERDATA=${script_dir}/../userdata/ubuntu-master01.yaml
+export NODE_USERDATA=${env_dir}/../userdata/ubuntu-master01.yaml

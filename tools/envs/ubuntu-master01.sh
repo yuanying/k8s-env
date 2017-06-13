@@ -2,8 +2,8 @@
 
 script_dir=$(dirname "${BASH_SOURCE}")
 
-export NODE_HOSTNAME='master01'
-export NODE_ADDRESS='192.168.203.11'
+export NODE_HOSTNAME='ubuntu-master01'
+export NODE_ADDRESS='192.168.201.11'
 export NODE_GATEWAY='192.168.11.1'
 export NODE_DNS='192.168.11.1'
 export NODE_NETWORK_RANGE='16'

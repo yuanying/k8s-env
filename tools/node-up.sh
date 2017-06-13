@@ -3,6 +3,14 @@
 set -eu
 export LC_ALL=C
 
+NODE_ENV=${1:-""}
+script_dir=$(dirname "${BASH_SOURCE}")
+
+if [[ ${NODE_ENV} != '' ]]; then
+    source ${NODE_ENV}
+fi
+
+
 NODE_UUID=${NODE_UUID:-$(uuidgen)}
 NODE_HOSTNAME=${NODE_HOSTNAME:-$1}
 NODE_CPU=${NODE_CPU:-'2'}
@@ -12,6 +20,12 @@ NODE_ADDITIONAL_DISKS=${NODE_ADDITIONAL_DISKS:-'10'}
 NODE_NETWORK_HOST_BRIDGE=${NODE_NETWORK_HOST_BRIDGE:-'br0'}
 NODE_IMAGE=${NODE_IMAGE:-'/var/lib/libvirt/images/ubuntu-xenial-docker-ec2-noclouds.qcow2'}
 NODE_USERDATA=${NODE_USERDATA:-'~/cloud.yaml'}
+
+
+if [[ ${NODE_ENV} != '' ]]; then
+    echo "Generate userdata: ${NODE_USERDATA}"
+    bash ${script_dir}/generate-userdata.sh > ${NODE_USERDATA}
+fi
 
 
 LIBVIRT_PATH=${LIBVIRT_PATH:-'/var/lib/libvirt/images'}

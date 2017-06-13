@@ -3,6 +3,7 @@
 set -eu
 export LC_ALL=C
 
+NODE_UUID=${NODE_UUID:-$(uuidgen)}
 NODE_HOSTNAME=${NODE_HOSTNAME:-$1}
 NODE_CPU=${NODE_CPU:-'2'}
 NODE_MEMORY=${NODE_MEMORY:-'2048'}
@@ -26,6 +27,11 @@ if [ ! -d ${USERDATA_DIR_PATH} ]; then
     sudo mkdir -p ${USERDATA_DIR_PATH} || (echo "Can not create ${USERDATA_DIR_PATH} directory" && exit 1)
 fi
 sudo cp ${NODE_USERDATA} ${USERDATA_DIR_PATH}/user_data
+sudo cat <<EOF | sudo tee ${USERDATA_DIR_PATH}/meta_data.json
+{
+    "uuid": "${NODE_UUID}"
+}
+EOF
 USERDATA_DISK="--filesystem ${LIBVIRT_PATH}/$NODE_HOSTNAME/,config-2,type=mount,mode=squash"
 
 

@@ -3,8 +3,8 @@ set -eu
 export LC_ALL=C
 
 cat <<EOF
----
 #cloud-config
+---
 hostname: ${NODE_HOSTNAME}
 
 # Set SSH Key

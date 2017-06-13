@@ -3,8 +3,8 @@ set -eu
 export LC_ALL=C
 
 cat <<EOF
----
 #cloud-config
+---
 # Before commit any change please validate this file @ https://coreos.com/validate/
 
 # Set hostname

@@ -33,7 +33,7 @@ sudo cat <<EOF | sudo tee ${USERDATA_DIR_PATH}/meta_data.json
     "uuid": "${NODE_UUID}"
 }
 EOF
-sudo mkisofs -R -V config-2 -o ${CONFIG_DRIVE_PATH} ${USERDATA_DIR_PATH}
+sudo mkisofs -R -V config-2 -o ${CONFIG_DRIVE_PATH} ${LIBVIRT_PATH}/${NODE_HOSTNAME}
 USERDATA_DISK="--disk ${CONFIG_DRIVE_PATH},device=cdrom,perms=ro"
 
 echo "Creating: ${NODE_HOSTNAME} node..."

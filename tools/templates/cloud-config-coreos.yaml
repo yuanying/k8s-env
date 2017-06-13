@@ -2,6 +2,9 @@
 set -eu
 export LC_ALL=C
 
+SWAP_PATH=/var/vm
+SWAP_FILE=swapfile1
+
 cat <<EOF
 #cloud-config
 ---
@@ -53,8 +56,6 @@ coreos:
 
         [Service]
         Type=oneshot
-        Environment="SWAP_PATH=/var/vm"
-        Environment="SWAP_FILE=swapfile1"
         ExecStartPre=-/usr/bin/rm -rf ${SWAP_PATH}
         ExecStartPre=/usr/bin/mkdir -p ${SWAP_PATH}
         ExecStartPre=/usr/bin/touch ${SWAP_PATH}/${SWAP_FILE}

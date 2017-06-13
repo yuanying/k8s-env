@@ -23,6 +23,7 @@ fi
 echo "Setup USERDATA: ${NODE_HOSTNAME} node..."
 
 USERDATA_DIR_PATH=${LIBVIRT_PATH}/${NODE_HOSTNAME}/openstack/latest
+CONFIG_DRIVE_PATH=${LIBVIRT_PATH}/${NODE_HOSTNAME}.iso
 if [ ! -d ${USERDATA_DIR_PATH} ]; then
     sudo mkdir -p ${USERDATA_DIR_PATH} || (echo "Can not create ${USERDATA_DIR_PATH} directory" && exit 1)
 fi
@@ -32,8 +33,8 @@ sudo cat <<EOF | sudo tee ${USERDATA_DIR_PATH}/meta_data.json
     "uuid": "${NODE_UUID}"
 }
 EOF
-USERDATA_DISK="--filesystem ${LIBVIRT_PATH}/$NODE_HOSTNAME/,config-2,type=mount,mode=squash"
-
+sudo mkisofs -R -V config-2 -o ${CONFIG_DRIVE_PATH} ${USERDATA_DIR_PATH}
+USERDATA_DISK="--disk ${CONFIG_DRIVE_PATH},device=cdrom,perms=ro"
 
 echo "Creating: ${NODE_HOSTNAME} node..."
 

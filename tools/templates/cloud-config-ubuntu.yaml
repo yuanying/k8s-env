@@ -15,6 +15,7 @@ network:
   config: disabled
 
 runcmd:
+  - [ rm, -f, /etc/network/interfaces.d/50-cloud-init.cfg]
   - [ rm, -f, /etc/network/interfaces.d/${NODE_NET_DEVICE}.cfg]
   - [ sh, -c, "echo 'auto ${NODE_NET_DEVICE}' >> /etc/network/interfaces.d/${NODE_NET_DEVICE}.cfg "]
   - [ sh, -c, "echo 'iface ${NODE_NET_DEVICE} inet static' >> /etc/network/interfaces.d/${NODE_NET_DEVICE}.cfg" ]

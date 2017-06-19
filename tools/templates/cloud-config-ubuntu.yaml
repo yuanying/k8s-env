@@ -12,18 +12,17 @@ ssh_authorized_keys:
 - ${NODE_PUBLIC_KEY}
 
 network:
-  config: disabled
+  version: 2
+  ethernets:
+    mng:
+      match:
+        name: ${NODE_NET_DEVICE}*
+      addresses:
+        - ${NODE_ADDRESS}/${NODE_NETWORK_RANGE}
+      gateway4: ${NODE_GATEWAY}
+      nameservers:
+        addresses: [${NODE_DNS}]
 
 runcmd:
-  - [ rm, -f, /etc/network/interfaces.d/50-cloud-init.cfg]
-  - [ rm, -f, /etc/network/interfaces.d/${NODE_NET_DEVICE}.cfg]
-  - [ sh, -c, "echo 'auto ${NODE_NET_DEVICE}' >> /etc/network/interfaces.d/${NODE_NET_DEVICE}.cfg "]
-  - [ sh, -c, "echo 'iface ${NODE_NET_DEVICE} inet static' >> /etc/network/interfaces.d/${NODE_NET_DEVICE}.cfg" ]
-  - [ sh, -c, "echo '  address ${NODE_ADDRESS}' >> /etc/network/interfaces.d/${NODE_NET_DEVICE}.cfg" ]
-  - [ sh, -c, "echo '  netmask ${NODE_NETMASK}' >> /etc/network/interfaces.d/${NODE_NET_DEVICE}.cfg" ]
-  - [ sh, -c, "echo '  gateway ${NODE_GATEWAY}' >> /etc/network/interfaces.d/${NODE_NET_DEVICE}.cfg"]
-  - [ sh, -c, "echo '  dns-nameservers ${NODE_DNS}' >> /etc/network/interfaces.d/${NODE_NET_DEVICE}.cfg"]
-  - [ ifdown, ${NODE_NET_DEVICE} ]
-  - [ ifup, ${NODE_NET_DEVICE} ]
   - [ sh, -c, "echo '127.0.1.1  ${NODE_HOSTNAME}' >> /etc/hosts"]
 EOF

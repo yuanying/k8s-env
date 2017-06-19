@@ -11,6 +11,9 @@ hostname: ${NODE_HOSTNAME}
 ssh_authorized_keys:
 - ${NODE_PUBLIC_KEY}
 
+network:
+  config: disabled
+
 runcmd:
   - [ rm, -f, /etc/network/interfaces.d/${NODE_NET_DEVICE}.cfg]
   - [ sh, -c, "echo 'auto ${NODE_NET_DEVICE}' >> /etc/network/interfaces.d/${NODE_NET_DEVICE}.cfg "]

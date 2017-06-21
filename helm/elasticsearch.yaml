@@ -1,0 +1,5 @@
+---
+service:
+  type: ClusterIP
+  httpPort: 9200
+  transportPort: 9300

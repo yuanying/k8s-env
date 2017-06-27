@@ -1,10 +1,11 @@
 common:
   image:
     repository: quay.io/pires/docker-elasticsearch-kubernetes
-    tag: 5.4.0
+    tag: 5.3.0
     pullPolicy: Always
   env:
     CLUSTER_NAME: "myesdb"
+    ES_PLUGINS_INSTALL: "x-pack"
     # Uncomment this if you get the "No up-and-running site-local (private) addresses" error
     # NETWORK_HOST: "_eth0_"
 

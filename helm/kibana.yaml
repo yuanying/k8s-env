@@ -1,0 +1,6 @@
+---
+image:
+  tag: 5.3.0
+env:
+  ELASTICSEARCH_URL: "http://escluster-elasticsearch:9200"
+  # XPACK_SECURITY_ENABLED: false

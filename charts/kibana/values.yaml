@@ -1,0 +1,11 @@
+image:
+  repository: docker.elastic.co/kibana/kibana
+  tag: 5.3.0
+  pullPolicy: Always
+env:
+  ELASTICSEARCH_URL: "http://elasticsearch:9200"
+replicas: 1
+
+service:
+  type: ClusterIP
+  httpPort: 80

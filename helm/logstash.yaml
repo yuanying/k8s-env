@@ -1,3 +1,6 @@
 ---
 persistentVolume:
   storageClass: "slow"
+
+elasticsearch:
+  url: http://escluster-elasticsearch:9200

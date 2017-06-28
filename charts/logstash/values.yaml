@@ -1,0 +1,67 @@
+image:
+  repository: docker.elastic.co/logstash/logstash
+  tag: 5.3.0
+  pullPolicy: Always
+replicas: 1
+
+env: {}
+
+elasticsearch:
+  url: http://elasticsearch:9200
+  username: elastic
+  password: changeme
+
+pipelineFiles:
+  default.conf: |-
+    input {
+      beats {
+        port => 5044
+      }
+    }
+
+    output {
+      stdout {
+        codec => rubydebug
+      }
+    }
+
+service:
+  type: ClusterIP
+  beatsPort: 5044
+  monitorPort: 9600
+
+persistentVolume:
+  ## If true, logstash will create/use a Persistent Volume Claim
+  ## If false, use emptyDir
+  ##
+  enabled: true
+
+  ## logstash data Persistent Volume access modes
+  ## Must match those of existing PV or dynamic provisioner
+  ## Ref: http://kubernetes.io/docs/user-guide/persistent-volumes/
+  ##
+  accessModes:
+    - ReadWriteMany
+
+  ## logstash data Persistent Volume Claim annotations
+  ##
+  annotations: {}
+
+  ## logstash data Persistent Volume existing claim name
+  ## Requires logstash.persistentVolume.enabled: true
+  ## If defined, PVC must be created manually before volume will be bound
+  existingClaim: ""
+
+  ## logstash data Persistent Volume mount root path
+  ##
+  mountPath: /data
+
+  ## logstash data Persistent Volume size
+  ##
+  size: 2Gi
+
+  ## logstash data Persistent Volume Storage Class
+  ## If defined, volume.beta.kubernetes.io/storage-class: <storageClass>
+  ## Default: volume.alpha.kubernetes.io/storage-class: default
+  ##
+  storageClass: ""

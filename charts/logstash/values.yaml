@@ -65,3 +65,9 @@ persistentVolume:
   ## Default: volume.alpha.kubernetes.io/storage-class: default
   ##
   storageClass: ""
+
+extraPorts: []
+  # - name: "syslog"
+  #   containerPort: 514
+  #   servicePort: 514
+  #   protocol: TCP

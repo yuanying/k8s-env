@@ -31,6 +31,11 @@ spec:
         - containerPort: 9600
           name: monitor
           protocol: TCP
+      {{- range .Values.extraPorts }}
+        - name: {{ .name }}
+          containerPort: {{ .containerPort }}
+          protocol: {{ .protocol }}
+      {{- end }}
         volumeMounts:
           - name: pipeline-config-volume
             mountPath: /usr/share/logstash/pipeline

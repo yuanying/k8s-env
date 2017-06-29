@@ -17,3 +17,9 @@ spec:
     port: {{ .Values.service.monitorPort }}
     targetPort: 9600
     protocol: TCP
+{{- range .Values.extraPorts }}
+  - name: {{ .name }}
+    port: {{ .servicePort }}
+    targetPort: {{ .containerPort }}
+    protocol: {{ .protocol }}
+{{- end }}

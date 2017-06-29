@@ -1,0 +1,160 @@
+image:
+  repository: kayrus/docker-elasticsearch-cerebro
+  tag: 0.6.5
+  pullPolicy: Always
+env:
+  ELASTICSEARCH_URL: "http://elasticsearch:9200"
+  ES_USERNAME: "elastic"
+  ES_PASSWORD: "changeme"
+  CEREBRO_SECRET: "10c3490cmoge9ya395ty35t0WUnhorsoe"
+replicas: 1
+
+service:
+  type: ClusterIP
+  httpPort: 9000
+
+configFiles:
+  application.conf.tmpl: |-
+    secret = "${CEREBRO_SECRET}"
+    basePath = "${SERVER_BASEPATH}"
+    #pidfile.path = "/var/run/cerebro.pid"
+    rest.history.size = 50 // defaults to 50 if not specified
+    data.path = "/tmp/cerebro.db"
+    auth = {
+    }
+    hosts = [
+      {
+       host = "${ELASTICSEARCH_URL}"
+       name = "Secured Cluster"
+       auth = {
+         username = "${ES_USERNAME}"
+         password = "${ES_PASSWORD}"
+       }
+      }
+    ]
+
+  reference.conf: |-
+    # Secret key
+    secret = "changeme"
+    play.crypto.secret = ${secret}
+
+    # The application languages
+    play.i18n.langs = ["en"]
+
+    # The application base path
+    basePath = "/"
+    play.http.context = ${basePath}
+
+    # Database configuration
+    data.path = "./cerebro.db"
+    slick.dbs.default.driver = "slick.driver.SQLiteDriver$"
+    slick.dbs.default.db.driver = org.sqlite.JDBC
+    slick.dbs.default.db.url = "jdbc:sqlite:"${data.path}
+    play.evolutions.db.default.autoApply = true
+
+  routes.tmpl: |-
+    # Home page
+    GET         ${SERVER_BASEPATH}/                                         controllers.Application.index()
+
+    # Aliases module
+    POST        ${SERVER_BASEPATH}/aliases/get_aliases                      @controllers.AliasesController.getAliases
+    POST        ${SERVER_BASEPATH}/aliases/update_aliases                   @controllers.AliasesController.updateAliases
+
+    # Rest module
+    POST        ${SERVER_BASEPATH}/rest/request                             @controllers.RestController.request
+    POST        ${SERVER_BASEPATH}/rest/get_cluster_mapping                 @controllers.RestController.getClusterMapping
+
+    # Overview module
+    POST        ${SERVER_BASEPATH}/overview                                 @controllers.ClusterOverviewController.index
+    POST        ${SERVER_BASEPATH}/overview/disable_shard_allocation        @controllers.ClusterOverviewController.disableShardAllocation
+    POST        ${SERVER_BASEPATH}/overview/enable_shard_allocation         @controllers.ClusterOverviewController.enableShardAllocation
+    POST        ${SERVER_BASEPATH}/overview/close_indices                   @controllers.ClusterOverviewController.closeIndices
+    POST        ${SERVER_BASEPATH}/overview/open_indices                    @controllers.ClusterOverviewController.openIndices
+    POST        ${SERVER_BASEPATH}/overview/force_merge                     @controllers.ClusterOverviewController.forceMerge
+    POST        ${SERVER_BASEPATH}/overview/clear_indices_cache             @controllers.ClusterOverviewController.clearIndexCache
+    POST        ${SERVER_BASEPATH}/overview/refresh_indices                 @controllers.ClusterOverviewController.refreshIndex
+    POST        ${SERVER_BASEPATH}/overview/delete_indices                  @controllers.ClusterOverviewController.deleteIndex
+    POST        ${SERVER_BASEPATH}/overview/get_shard_stats                 @controllers.ClusterOverviewController.getShardStats
+
+    # Navbar module
+    POST        ${SERVER_BASEPATH}/navbar                                   @controllers.NavbarController.index
+
+    # Analysis module
+    POST        ${SERVER_BASEPATH}/analysis/indices                         @controllers.AnalysisController.getIndices
+    POST        ${SERVER_BASEPATH}/analysis/analyzers                       @controllers.AnalysisController.getIndexAnalyzers
+    POST        ${SERVER_BASEPATH}/analysis/fields                          @controllers.AnalysisController.getIndexFields
+    POST        ${SERVER_BASEPATH}/analysis/analyze/analyzer                @controllers.AnalysisController.analyzeByAnalyzer
+    POST        ${SERVER_BASEPATH}/analysis/analyze/field                   @controllers.AnalysisController.analyzeByField
+
+    # Cluster Changes Controller
+    POST        ${SERVER_BASEPATH}/cluster_changes                          @controllers.ClusterChangesController.get
+
+    # Commons
+    POST        ${SERVER_BASEPATH}/commons/indices                          @controllers.CommonsController.indices
+    POST        ${SERVER_BASEPATH}/commons/nodes                            @controllers.CommonsController.nodes
+    POST        ${SERVER_BASEPATH}/commons/get_index_settings               @controllers.CommonsController.getIndexSettings
+    POST        ${SERVER_BASEPATH}/commons/get_index_mapping                @controllers.CommonsController.getIndexMappings
+    POST        ${SERVER_BASEPATH}/commons/get_node_stats                   @controllers.CommonsController.getNodeStats
+
+    # Create index module
+    POST        ${SERVER_BASEPATH}/create_index/get_index_metadata          @controllers.CreateIndexController.getIndexMetadata
+    POST        ${SERVER_BASEPATH}/create_index/create                      @controllers.CreateIndexController.execute
+
+    # Index templates module
+    POST        ${SERVER_BASEPATH}/templates                                @controllers.TemplatesController.templates
+    POST        ${SERVER_BASEPATH}/templates/delete                         @controllers.TemplatesController.delete
+    POST        ${SERVER_BASEPATH}/templates/create                         @controllers.TemplatesController.create
+
+    # Cluster settings module
+    POST        ${SERVER_BASEPATH}/cluster_settings                         @controllers.ClusterSettingsController.getSettings
+    POST        ${SERVER_BASEPATH}/cluster_settings/save                    @controllers.ClusterSettingsController.save
+
+    # Index settings module
+    POST        ${SERVER_BASEPATH}/index_settings                           @controllers.IndexSettingsController.get
+    POST        ${SERVER_BASEPATH}/index_settings/update                    @controllers.IndexSettingsController.update
+
+    # Connect module
+    GET         ${SERVER_BASEPATH}/connect/hosts                            @controllers.ConnectController.index
+
+    # Repositories module
+    POST        ${SERVER_BASEPATH}/repositories                             @controllers.RepositoriesController.get
+    POST        ${SERVER_BASEPATH}/repositories/create                      @controllers.RepositoriesController.save
+    POST        ${SERVER_BASEPATH}/repositories/delete                      @controllers.RepositoriesController.delete
+
+    # Snapshots module
+    POST        ${SERVER_BASEPATH}/snapshots                                @controllers.SnapshotsController.get
+    POST        ${SERVER_BASEPATH}/snapshots/load                           @controllers.SnapshotsController.getSnapshots
+    POST        ${SERVER_BASEPATH}/snapshots/create                         @controllers.SnapshotsController.create
+    POST        ${SERVER_BASEPATH}/snapshots/delete                         @controllers.SnapshotsController.delete
+    POST        ${SERVER_BASEPATH}/snapshots/restore                        @controllers.SnapshotsController.restore
+
+    # Map the JS resource paths
+    GET         ${SERVER_BASEPATH}/public/*file                             controllers.Assets.at(path="/public", file)
+    GET         ${SERVER_BASEPATH}/*file                                    controllers.Assets.versioned(path="/public", file: Asset)
+
+  logback.xml: |-
+    <configuration>
+
+        <conversionRule conversionWord="coloredLevel" converterClass="play.api.libs.logback.ColoredLevel"/>
+
+        <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>%coloredLevel %logger{15} - %message%n%xException{5}</pattern>
+            </encoder>
+        </appender>
+
+        <logger name="play" level="INFO"/>
+        <logger name="application" level="INFO"/>
+
+        <!-- Off these ones as they are annoying, and anyway we manage configuration ourself -->
+        <logger name="com.avaje.ebean.config.PropertyMapLoader" level="OFF"/>
+        <logger name="com.avaje.ebeaninternal.server.core.XmlConfigLoader" level="OFF"/>
+        <logger name="com.avaje.ebeaninternal.server.lib.BackgroundThread" level="OFF"/>
+        <logger name="com.gargoylesoftware.htmlunit.javascript" level="OFF"/>
+
+        <root level="ERROR">
+            <appender-ref ref="STDOUT"/>
+            <appender-ref ref="FILE"/>
+        </root>
+
+    </configuration>

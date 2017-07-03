@@ -9,7 +9,8 @@ nodeExporter:
       readOnly: true
 server:
   persistentVolume:
-    enabled: false
+    accessModes: [ ReadWriteMany ]
+    storageClass: slow
   service:
     type: NodePort
   extraHostPathMounts:
@@ -19,7 +20,8 @@ server:
       readOnly: true
 alertmanager:
   persistentVolume:
-    enabled: false
+    accessModes: [ ReadWriteMany ]
+    storageClass: slow
 serverFiles:
   alerts: |-
     ALERT AIRFLOW_TEMPERATURE_CEL_INVALID

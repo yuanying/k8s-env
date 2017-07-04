@@ -2,7 +2,8 @@
 set -eu
 export LC_ALL=C
 
-SWAPFILE=/2GiB.swap
+SWAP_PATH=/var/vm
+SWAP_FILE=swapfile1
 
 cat <<EOF
 #cloud-config
@@ -49,36 +50,25 @@ coreos:
       command: restart
     - name: systemd-sysctl.service
       command: restart
-    - name: create-swap.service
-      command: start
-      runtime: true
-      content: |
-        [Unit]
-        Description=Create swap file
-        Before=swap.service
-
-        [Service]
-        Type=oneshot
-        ExecStart=/usr/bin/touch ${SWAPFILE}
-        ExecStart=/usr/bin/fallocate -l 2048m ${SWAPFILE}
-        ExecStart=/usr/bin/chmod 600 ${SWAPFILE}
-        ExecStart=/usr/sbin/mkswap ${SWAPFILE}
-
-        [Install]
-        WantedBy=multi-user.target
     - name: swap.service
-      command: start
-      content: |
+      enable: true
+      contents: |
         [Unit]
         Description=Turn on swap
 
         [Service]
         Type=oneshot
+        ExecStartPre=-/usr/bin/rm -rf ${SWAP_PATH}
+        ExecStartPre=/usr/bin/mkdir -p ${SWAP_PATH}
+        ExecStartPre=/usr/bin/touch ${SWAP_PATH}/${SWAP_FILE}
+        ExecStartPre=/bin/bash -c "fallocate -l 1024m ${SWAP_PATH}/${SWAP_FILE}"
+        ExecStartPre=/usr/bin/chmod 600 ${SWAP_PATH}/${SWAP_FILE}
+        ExecStartPre=/usr/sbin/mkswap ${SWAP_PATH}/${SWAP_FILE}
+        ExecStartPre=/usr/sbin/sysctl vm.swappiness=10
+        ExecStart=/sbin/swapon ${SWAP_PATH}/${SWAP_FILE}
+        ExecStop=/sbin/swapoff ${SWAP_PATH}/${SWAP_FILE}
+        ExecStopPost=-/usr/bin/rm -rf ${SWAP_PATH}
         RemainAfterExit=true
-        ExecStartPre=/usr/sbin/losetup -f ${SWAPFILE}
-        ExecStart=/usr/bin/sh -c "/sbin/swapon $(/usr/sbin/losetup -j ${SWAPFILE} | /usr/bin/cut -d : -f 1)"
-        ExecStop=/usr/bin/sh -c "/sbin/swapoff $(/usr/sbin/losetup -j ${SWAPFILE} | /usr/bin/cut -d : -f 1)"
-        ExecStopPost=/usr/bin/sh -c "/usr/sbin/losetup -d $(/usr/sbin/losetup -j ${SWAPFILE} | /usr/bin/cut -d : -f 1)"
 
         [Install]
         WantedBy=multi-user.target

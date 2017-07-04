@@ -51,7 +51,7 @@ coreos:
     - name: systemd-sysctl.service
       command: restart
     - name: swap.service
-      enable: true
+      command: start
       contents: |
         [Unit]
         Description=Turn on swap

@@ -1,0 +1,25 @@
+gluster:
+  enabled: true
+
+  nodeSelector:
+    storagenode: glusterfs
+
+  image:
+    repository: gluster/gluster-centos
+    tag: latest
+    pullPolicy: Always
+
+  env: {}
+
+heketi:
+  image:
+    repository: heketi/heketi
+    tag: dev
+    pullPolicy: Always
+
+service:
+  type: ClusterIP
+  httpPort: 8080
+
+rbac:
+  enabled: false

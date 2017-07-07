@@ -1,0 +1,111 @@
+{{- if .Values.gluster.enabled -}}
+---
+kind: DaemonSet
+apiVersion: extensions/v1beta1
+metadata:
+  name: {{ template "fullname" . }}
+  labels:
+    app: {{ template "fullname" . }}
+    heritage: "{{ .Release.Service }}"
+    release: "{{ .Release.Name }}"
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    glusterfs: daemonset
+  annotations:
+    description: GlusterFS DaemonSet
+    tags: glusterfs
+spec:
+  template:
+    metadata:
+      name: glusterfs
+      labels:
+        app: {{ template "fullname" . }}
+        heritage: "{{ .Release.Service }}"
+        release: "{{ .Release.Name }}"
+        chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+        glusterfs-node: pod
+    spec:
+      nodeSelector:
+{{ toYaml .Values.gluster.nodeSelector | indent 8 }}
+      hostNetwork: true
+      containers:
+      - image: "{{ .Values.gluster.image.repository }}:{{ .Values.gluster.image.tag }}"
+        imagePullPolicy: {{ .Values.gluster.image.pullPolicy }}
+        name: glusterfs
+        volumeMounts:
+        - name: glusterfs-heketi
+          mountPath: "/var/lib/heketi"
+        - name: glusterfs-run
+          mountPath: "/run"
+        - name: glusterfs-lvm
+          mountPath: "/run/lvm"
+        - name: glusterfs-etc
+          mountPath: "/etc/glusterfs"
+        - name: glusterfs-logs
+          mountPath: "/var/log/glusterfs"
+        - name: glusterfs-config
+          mountPath: "/var/lib/glusterd"
+        - name: glusterfs-dev
+          mountPath: "/dev"
+        - name: glusterfs-misc
+          mountPath: "/var/lib/misc/glusterfsd"
+        - name: glusterfs-cgroup
+          mountPath: "/sys/fs/cgroup"
+          readOnly: true
+        - name: glusterfs-ssl
+          mountPath: "/etc/ssl"
+          readOnly: true
+        securityContext:
+          capabilities: {}
+          privileged: true
+        readinessProbe:
+          timeoutSeconds: 3
+          initialDelaySeconds: 40
+          exec:
+            command:
+            - "/bin/bash"
+            - "-c"
+            - systemctl status glusterd.service
+          periodSeconds: 25
+          successThreshold: 1
+          failureThreshold: 15
+        livenessProbe:
+          timeoutSeconds: 3
+          initialDelaySeconds: 40
+          exec:
+            command:
+            - "/bin/bash"
+            - "-c"
+            - systemctl status glusterd.service
+          periodSeconds: 25
+          successThreshold: 1
+          failureThreshold: 15
+      volumes:
+      - name: glusterfs-heketi
+        hostPath:
+          path: "/var/lib/heketi"
+      - name: glusterfs-run
+      - name: glusterfs-lvm
+        hostPath:
+          path: "/run/lvm"
+      - name: glusterfs-etc
+        hostPath:
+          path: "/etc/glusterfs"
+      - name: glusterfs-logs
+        hostPath:
+          path: "/var/log/glusterfs"
+      - name: glusterfs-config
+        hostPath:
+          path: "/var/lib/glusterd"
+      - name: glusterfs-dev
+        hostPath:
+          path: "/dev"
+      - name: glusterfs-misc
+        hostPath:
+          path: "/var/lib/misc/glusterfsd"
+      - name: glusterfs-cgroup
+        hostPath:
+          path: "/sys/fs/cgroup"
+      - name: glusterfs-ssl
+        hostPath:
+          path: "/etc/ssl"
+{{- end -}}

@@ -1,0 +1,71 @@
+---
+kind: Deployment
+apiVersion: extensions/v1beta1
+metadata:
+  name: {{ template "fullname" . }}
+  labels:
+    app: {{ template "fullname" . }}
+    heritage: "{{ .Release.Service }}"
+    release: "{{ .Release.Name }}"
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    glusterfs: heketi-deployment
+  annotations:
+    description: Defines how to deploy Heketi
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: heketi
+      labels:
+        app: {{ template "fullname" . }}-heketi
+        heritage: "{{ .Release.Service }}"
+        release: "{{ .Release.Name }}"
+        chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+        glusterfs: heketi-pod
+    spec:
+      serviceAccountName: {{ template "fullname" . }}
+      containers:
+      - image: "{{ .Values.heketi.image.repository }}:{{ .Values.heketi.image.tag }}"
+        imagePullPolicy: "{{ .Values.heketi.image.pullPolicy }}"
+        name: heketi
+        env:
+        - name: HEKETI_EXECUTOR
+          value: kubernetes
+        - name: HEKETI_FSTAB
+          value: "/var/lib/heketi/fstab"
+        - name: HEKETI_SNAPSHOT_LIMIT
+          value: '14'
+        - name: HEKETI_KUBE_GLUSTER_DAEMONSET
+          value: "y"
+        - name: HEKETI_KUBE_DB_SECRET_NAME
+          value: "{{ template "fullname" . }}"
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+        - name: heketi-db-secret
+          mountPath: "/backupdb"
+        - name: db
+          mountPath: "/var/lib/heketi"
+        - name: config
+          mountPath: "/etc/heketi"
+        readinessProbe:
+          timeoutSeconds: 3
+          initialDelaySeconds: 3
+          httpGet:
+            path: "/hello"
+            port: 8080
+        livenessProbe:
+          timeoutSeconds: 3
+          initialDelaySeconds: 30
+          httpGet:
+            path: "/hello"
+            port: 8080
+      volumes:
+      - name: db
+        emptyDir: {}
+      - name: heketi-db-secret
+        secret:
+          secretName: {{ template "fullname" . }}
+      - name: config
+        configMap:
+          name: {{ template "fullname" . }}

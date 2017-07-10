@@ -10,6 +10,7 @@ $ helm install ./charts/cerebro -n cerebro -f helm/cerebro.yaml
 # Update
 
 ```bash
+$ helm upgrade escluster ./charts/elasticsearch -f helm/elasticsearch.yaml
 $ helm upgrade lscluster ./charts/logstash -f helm/logstash.yaml
 $ helm upgrade cerebro ./charts/cerebro -f helm/cerebro.yaml
 ```

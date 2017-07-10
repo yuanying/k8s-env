@@ -3,7 +3,7 @@
 kind: DaemonSet
 apiVersion: extensions/v1beta1
 metadata:
-  name: {{ template "fullname" . }}
+  name: {{ template "fullname" . }}-gluster
   labels:
     app: {{ template "fullname" . }}
     heritage: "{{ .Release.Service }}"

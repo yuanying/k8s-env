@@ -4,5 +4,5 @@ metadata:
   name: slow
 provisioner: kubernetes.io/glusterfs
 parameters:
-  resturl: "http://10.254.0.91:8080"
+  resturl: "http://__HEKETI_ADDRESS__:8080"
   volumetype: "replicate:2"

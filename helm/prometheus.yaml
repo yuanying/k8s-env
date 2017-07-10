@@ -11,8 +11,6 @@ server:
   persistentVolume:
     accessModes: [ ReadWriteMany ]
     storageClass: slow
-  service:
-    type: NodePort
   extraHostPathMounts:
     - name: extra-certs-dir
       mountPath: /etc/etcd/pki

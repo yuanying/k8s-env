@@ -15,6 +15,7 @@ from fabric.api import *
 
 from lib import device_mapper
 from lib import helpers
+from lib import mount
 
 helpers.create_env_tasks(globals())
 

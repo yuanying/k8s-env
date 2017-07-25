@@ -21,10 +21,11 @@ from lib import helpers
 @task
 def enable():
     files.upload_template(
-        os.path.join(
+        'dm_snapshot.conf',
+        '/etc/modules-load.d/dm_snapshot.conf',
+        template_dir=os.path.join(
             helpers.__fabric_lib_dir, 'templates', 'dm_snapshot.conf'
         ),
-        '/etc/modules-load.d/dm_snapshot.conf',
         use_sudo=True,
         backup=False,
     )

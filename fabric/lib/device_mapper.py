@@ -24,7 +24,7 @@ def enable():
         'dm_snapshot.conf',
         '/etc/modules-load.d/dm_snapshot.conf',
         template_dir=os.path.join(
-            helpers.__fabric_lib_dir, 'templates', 'dm_snapshot.conf'
+            helpers.__fabric_lib_dir, 'templates'
         ),
         use_sudo=True,
         backup=False,

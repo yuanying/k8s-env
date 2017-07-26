@@ -1,0 +1,24 @@
+log:
+  level: 4
+
+provisioner:
+  image:
+    repository: yuanying/glusterfs-simple-provisioner
+    tag: latest
+    pullPolicy: Always
+
+  replicas: 1
+
+gluster:
+  nodeSelector:
+    storagenode: glusterfs
+
+  image:
+    repository: gluster/gluster-centos
+    tag: latest
+    pullPolicy: Always
+
+  env: {}
+
+rbac:
+  enabled: true

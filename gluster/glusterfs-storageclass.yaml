@@ -1,0 +1,12 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: slow
+provisioner: gluster.org/glusterfs-simple
+parameters:
+  brickrootPaths: >
+    192.168.1.124:/var/lib/heketi/vdb,
+    192.168.1.125:/var/lib/heketi/vdb,
+    192.168.1.124:/var/lib/heketi/vdc,
+    192.168.1.125:/var/lib/heketi/vdc
+  volumeType: "replica 2"

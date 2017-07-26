@@ -52,7 +52,7 @@ coreos:
       command: restart
     - name: swap.service
       command: start
-      contents: |
+      content: |
         [Unit]
         Description=Turn on swap
 

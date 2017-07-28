@@ -13,3 +13,4 @@ spec:
     port: {{ .Values.service.httpPort }}
     targetPort: 5601
     protocol: TCP
+  sessionAffinity: {{ .Values.service.sessionAffinity }}

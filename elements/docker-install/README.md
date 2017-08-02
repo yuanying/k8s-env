@@ -1,7 +1,7 @@
 # How to install
 
 ```bash
-git clone https://github.com/nec-openstack/remora.git
+git clone https://github.com/yuanying/k8s-env.git
 git clone https://git.openstack.org/openstack/diskimage-builder.git
 git clone https://git.openstack.org/openstack/tripleo-image-elements.git
 git clone https://git.openstack.org/openstack/heat-templates.git
@@ -10,7 +10,7 @@ export PATH="${PWD}/dib-utils/bin:$PATH"
 export ELEMENTS_PATH=diskimage-builder/elements
 export ELEMENTS_PATH=${ELEMENTS_PATH}:tripleo-image-elements/elements
 export ELEMENTS_PATH=${ELEMENTS_PATH}:heat-templates/hot/software-config/elements
-export ELEMENTS_PATH=${ELEMENTS_PATH}:remora/elements
+export ELEMENTS_PATH=${ELEMENTS_PATH}:k8s-env/elements
 
 export DIB_CLOUD_INIT_DATASOURCES="Ec2, ConfigDrive, NoCloud"
 ```

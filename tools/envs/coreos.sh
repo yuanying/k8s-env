@@ -8,7 +8,7 @@ RELEASE=current
 export NODE_OS_DISTRO='coreos'
 export NODE_IMAGE_ORG="/var/lib/libvirt/images/coreos_${CHANNEL}_${RELEASE}_qemu_image.img"
 export NODE_IMAGE="/var/lib/libvirt/images/coreos_${CHANNEL}_${RELEASE}_qemu_image.qcow2"
-export NODE_ADDRESS_PREFIX='192.168.1'
+export NODE_ADDRESS_PREFIX=${NODE_ADDRESS_PREFIX:-'192.168.1'}
 export NODE_NET_DEVICE='eth0'
 
 export NODE_ADDITIONAL_DISKS=''

@@ -23,15 +23,16 @@ from lib import helpers
 def parted():
     try:
         for device in env.devices[env.host]:
+            path  = device['path']
             with settings(warn_only=True):
                 result = sudo(
-                    "parted {device} mklabel gpt".format(device=device)
+                    "parted {path} mklabel gpt".format(path=path)
                 )
             if not result.failed:
                 sudo(
-                    "parted {device} "
+                    "parted {path} "
                     "-s mkpart untitled ext4 0G 100% "
-                    "-s p".format(device=device)
+                    "-s p".format(path=path)
                 )
     except KeyError as e:
         pass
@@ -40,9 +41,14 @@ def parted():
 def format():
     try:
         for device in env.devices[env.host]:
+            label = device['name']
+            path  = device['path']
             with settings(warn_only=True):
                 result = sudo(
-                    "mkfs.ext4 {device} ".format(device=device)
+                    "mkfs.xfs -i size=512 {path} -L {label}".format(
+                        path=path,
+                        label=label,
+                    )
                 )
             if result.failed:
                 print(yellow("Device is already formated: {}".format(device)))
@@ -53,20 +59,15 @@ def format():
 def mount():
     try:
         for device in env.devices[env.host]:
-            basename = os.path.basename(device)
-            mountpath = os.path.join("/var/lib/heketi", basename)
+            label = device['name']
+            mountpath = os.path.join("/var/lib/heketi", label)
             unitname = "-".join(mountpath.split("/")[1:])
             sudo(
                 "mkdir -p {mountpath}".format(
                     mountpath=mountpath,
                 )
             )
-            uuid = sudo(
-                "blkid {device} -o value -s UUID".format(
-                    device=device,
-                )
-            ).stdout
-            source = "/dev/disk/by-uuid/{uuid}".format(uuid=uuid)
+            source = "/dev/disk/by-label/{label}".format(label=label)
             files.upload_template(
                 'mount.mount',
                 '/etc/systemd/system/{}.mount'.format(unitname),

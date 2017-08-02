@@ -5,8 +5,8 @@ metadata:
 provisioner: gluster.org/glusterfs-simple
 parameters:
   brickrootPaths: >
-    192.168.1.124:/var/lib/heketi/vdb,
-    192.168.1.125:/var/lib/heketi/vdb,
-    192.168.1.124:/var/lib/heketi/vdc,
-    192.168.1.125:/var/lib/heketi/vdc
+    192.168.1.124:/var/lib/heketi/dev04,
+    192.168.1.125:/var/lib/heketi/dev06,
+    192.168.1.124:/var/lib/heketi/dev05,
+    192.168.1.125:/var/lib/heketi/dev07
   volumeType: "replica 2"

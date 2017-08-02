@@ -14,17 +14,26 @@ hosts:
 
 devices:
   192.168.1.121:
-  - /dev/vdb
+  - path: /dev/vdb
+    name: dev01
   192.168.1.122:
-  - /dev/vdb
+  - path: /dev/vdb
+    name: dev02
   192.168.1.123:
-  - /dev/vdb
+  - path: /dev/vdb
+    name: dev03
   192.168.1.124:
-  - /dev/vdb
-  - /dev/vdc
+  - path: /dev/vdb
+    name: dev04
+  - path: /dev/vdc
+    name: dev05
   192.168.1.125:
-  - /dev/vdb
-  - /dev/vdc
+  - path: /dev/vdb
+    name: dev06
+  - path: /dev/vdc
+    name: dev07
   192.168.1.126:
-  - /dev/vdb
-  - /dev/vdc
+  - path: /dev/vdb
+    name: dev08
+  - path: /dev/vdc
+    name: dev09

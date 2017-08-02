@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+export NODE_GATEWAY=${NODE_GATEWAY:-'192.168.11.1'}
+export NODE_DNS=${NODE_DNS:-'192.168.11.1'}
+export NODE_NETWORK_RANGE=${NODE_NETWORK_RANGE:-'16'}

@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 
+env_dir=$(dirname "${BASH_SOURCE}")
+source ${env_dir}/common.sh
+
 CHANNEL=stable
 RELEASE=current
 export NODE_OS_DISTRO='coreos'
 export NODE_IMAGE_ORG="/var/lib/libvirt/images/coreos_${CHANNEL}_${RELEASE}_qemu_image.img"
 export NODE_IMAGE="/var/lib/libvirt/images/coreos_${CHANNEL}_${RELEASE}_qemu_image.qcow2"
 export NODE_ADDRESS_PREFIX='192.168.1'
-export NODE_GATEWAY='192.168.11.1'
-export NODE_DNS='192.168.11.1'
-export NODE_NETWORK_RANGE='16'
 export NODE_NET_DEVICE='eth0'
 
 export NODE_ADDITIONAL_DISKS=''

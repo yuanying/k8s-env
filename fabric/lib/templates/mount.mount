@@ -1,6 +1,7 @@
 [Mount]
 What={{ source }}
 Where={{ dest }}
-Type=ext4
+Type=xfs
+Options=defaults,noatime,uquota,gquota,pquota
 [Install]
 WantedBy=multi-user.target

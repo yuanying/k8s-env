@@ -3,8 +3,8 @@
 ## Requirements
 
 ```bash
-$ sudo apt install -y virtinst
-$ sudo apt install -y xorriso
+$ sudo apt install -y virtinst qemu-kvm
+$ sudo apt install -y xorriso uuid-runtime genisoimage
 ```
 
 ## Node up!
@@ -24,5 +24,5 @@ $ bash tools/node-up.sh tools/envs/worker01.sh # Start worker01 server
 1.  Build docker-installed image.
     -   See [elements/docker-install/REDME.md](../elements/docker-install/README.md)
 2.  Copy built image to required path.
-    -   `cp ubuntu-xenial-docker-ec2-noclouds.qcow2 /var/lib/libvirt/images/ubuntu-xenial-docker-ec2-noclouds.qcow2`
-    -   `cp centos7-docker-ec2-noclouds.qcow2 /var/lib/libvirt/images/centos7-docker-ec2-noclouds.qcow2`
+    -   `sudo cp ubuntu-xenial-docker-ec2-noclouds.qcow2 /var/lib/libvirt/images/ubuntu-xenial-docker-ec2-noclouds.qcow2`
+    -   `sudo cp centos7-docker-ec2-noclouds.qcow2 /var/lib/libvirt/images/centos7-docker-ec2-noclouds.qcow2`

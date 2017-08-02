@@ -18,3 +18,11 @@ $ export NODE_DNS=192.168.11.1 # Specify DNS server address
 $ bash tools/node-up.sh tools/envs/master01.sh # Start master01 server
 $ bash tools/node-up.sh tools/envs/worker01.sh # Start worker01 server
 ```
+
+### For Ubuntu/CentOS
+
+1.  Build docker-installed image.
+    -   See [elements/docker-install/REDME.md](../elements/docker-install/README.md)
+2.  Copy built image to required path.
+    -   `cp ubuntu-xenial-docker-ec2-noclouds.qcow2 /var/lib/libvirt/images/ubuntu-xenial-docker-ec2-noclouds.qcow2`
+    -   `cp centos7-docker-ec2-noclouds.qcow2 /var/lib/libvirt/images/centos7-docker-ec2-noclouds.qcow2`

@@ -25,5 +25,5 @@ runcmd:
   - [ sh, -c, "echo '  dns-nameservers ${NODE_DNS}' >> /etc/network/interfaces.d/${NODE_NET_DEVICE}.cfg"]
   - [ ifdown, ${NODE_NET_DEVICE} ]
   - [ ifup, ${NODE_NET_DEVICE} ]
-  - [ sh, -c, "echo '127.0.1.1  ${NODE_HOSTNAME}' >> /etc/hosts"]
+  - [ sh, -c, "echo '127.0.0.1  ${NODE_HOSTNAME}' >> /etc/hosts"]
 EOF

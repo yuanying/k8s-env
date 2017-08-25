@@ -57,5 +57,12 @@ $ kubectl create -f gluster/glusterfs-storageclass.yaml
 ## Kubernetes Dashbord
 
 ```bash
-$ helm install ui stable/kubernetes-dashboard -f helm/dashboard.yaml
+$ helm install -n ui stable/kubernetes-dashboard -f helm/dashboard.yaml
+```
+
+## Nginx-Ingress
+
+```bash
+$ kubectl label node 192.168.1.111 192.168.1.112 192.168.1.113 ingressnode=nginx
+$ helm install -n ing stable/nginx-ingress -f helm/nginx-ingress.yaml
 ```

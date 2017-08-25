@@ -1,0 +1,13 @@
+---
+controller:
+  hostNetwork: true
+  kind: DaemonSet
+  nodeSelector:
+    ingressnode: nginx
+  service:
+    type: ClusterIP
+  stats:
+    enabled: true
+
+rbac:
+  create: true

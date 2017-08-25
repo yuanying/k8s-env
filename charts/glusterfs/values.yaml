@@ -3,7 +3,7 @@ log:
 
 provisioner:
   image:
-    repository: yuanying/glusterfs-simple-provisioner
+    repository: quay.io/external_storage/glusterfs-simple-provisioner
     tag: latest
     pullPolicy: Always
 

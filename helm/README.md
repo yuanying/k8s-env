@@ -53,3 +53,9 @@ $ kubectl get pod --selector glusterfs-node=pod -o json | \
 ```bash
 $ kubectl create -f gluster/glusterfs-storageclass.yaml
 ```
+
+## Kubernetes Dashbord
+
+```bash
+$ helm install ui stable/kubernetes-dashboard -f helm/dashboard.yaml
+```

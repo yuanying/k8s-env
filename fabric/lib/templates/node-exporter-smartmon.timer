@@ -1,0 +1,8 @@
+[Unit]
+Description=Run node-exporter-smartmon service every 10 minutes
+
+[Timer]
+OnCalendar=*:0/10
+
+[Install]
+WantedBy=timers.target

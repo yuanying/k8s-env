@@ -16,6 +16,7 @@ from fabric.api import *
 from lib import device_mapper
 from lib import helpers
 from lib import mount
+from lib import smartmon
 
 helpers.create_env_tasks(globals())
 

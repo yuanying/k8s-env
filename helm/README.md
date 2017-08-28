@@ -72,3 +72,9 @@ $ helm install -n ing stable/nginx-ingress -f helm/nginx-ingress.yaml
 ```bash
 $ helm install -n certs stable/kube-lego -f helm/kube-lego.yaml
 ```
+
+## Gitlab CE
+
+```bash
+$ helm install -n git stable/gitlab-ce -f helm/gitlab-ce.yaml
+```

@@ -6,7 +6,7 @@
 
 ## Upgrade Prometheus
 
-    $ helm upgrade -f helm/prometheus.yaml prom0 local/prometheus
+    $ helm upgrade -f helm/prometheus.yaml prom0 stable/prometheus --recreate-pods
 
 ## Install Grafana
 

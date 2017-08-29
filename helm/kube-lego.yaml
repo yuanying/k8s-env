@@ -4,3 +4,11 @@ config:
 
 rbac:
   create: true
+
+resources:
+  limits:
+    cpu: 20m
+    memory: 8Mi
+  requests:
+    cpu: 20m
+    memory: 8Mi

@@ -71,6 +71,7 @@ $ helm install -n ing stable/nginx-ingress -f helm/nginx-ingress.yaml
 
 ```bash
 $ helm install -n certs stable/kube-lego -f helm/kube-lego.yaml
+$ helm upgrade certs stable/kube-lego -f helm/kube-lego.yaml --recreate-pods
 ```
 
 ## Gitlab CE

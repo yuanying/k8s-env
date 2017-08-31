@@ -65,6 +65,7 @@ $ helm install -n ui stable/kubernetes-dashboard -f helm/dashboard.yaml
 ```bash
 $ kubectl label node 192.168.1.111 192.168.1.112 192.168.1.113 ingressnode=nginx
 $ helm install -n ing stable/nginx-ingress -f helm/nginx-ingress.yaml
+$ helm upgrade ing stable/nginx-ingress -f helm/nginx-ingress.yaml --recreate-pods
 ```
 
 ## kube-lego

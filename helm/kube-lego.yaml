@@ -8,7 +8,7 @@ rbac:
 resources:
   limits:
     cpu: 20m
-    memory: 8Mi
+    memory: 48Mi
   requests:
     cpu: 20m
-    memory: 8Mi
+    memory: 48Mi

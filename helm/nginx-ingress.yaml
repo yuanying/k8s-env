@@ -16,3 +16,11 @@ controller:
 
 rbac:
   create: true
+
+tcp:
+  25: "default/ma0-mailserver:25"
+  587: "default/ma0-mailserver:587"
+  993: "default/ma0-mailserver:993"
+  # 25: "default/ma0-mailserver:25:PROXY"
+  # 587: "default/ma0-mailserver:587:PROXY"
+  # 993: "default/ma0-mailserver:993:PROXY"

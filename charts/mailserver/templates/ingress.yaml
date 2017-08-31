@@ -1,0 +1,28 @@
+{{- if .Values.letsEncrypt.enabled -}}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+{{- if .Values.letsEncrypt.ingress.annotations }}
+  annotations:
+{{ toYaml .Values.letsEncrypt.ingress.annotations | indent 4 }}
+{{- end }}
+  labels:
+    app: {{ template "fullname" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: "{{ .Values.name }}"
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+  name: {{ template "fullname" . }}
+spec:
+  rules:
+    - host: "{{ .Values.hostname }}"
+      http:
+        paths:
+          - backend:
+              serviceName: {{ .Values.letsEncrypt.ingress.backend.serviceName }}
+              servicePort: {{ .Values.letsEncrypt.ingress.backend.servicePort }}
+  tls:
+    - secretName: {{ template "fullname" . }}-tls
+      hosts:
+        - "{{ .Values.hostname }}"
+{{- end -}}

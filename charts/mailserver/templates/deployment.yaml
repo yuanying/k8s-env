@@ -1,0 +1,116 @@
+kind: Deployment
+apiVersion: extensions/v1beta1
+metadata:
+  labels:
+    app: {{ template "fullname" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: "{{ .Values.name }}"
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+  name: {{ template "fullname" . }}
+spec:
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: {{ template "fullname" . }}
+        component: "{{ .Values.name }}"
+        release: {{ .Release.Name }}
+    spec:
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+      containers:
+        - name: mailserver
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: "{{ .Values.image.pullPolicy }}"
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+          ports:
+            - name: smtp
+              containerPort: 25
+            - name: smtp-auth
+              containerPort: 587
+            - name: imap-secure
+              containerPort: 993
+          env:
+            - name: DMS_DEBUG
+              value: '1'
+            - name: ONE_DIR
+              value: '1'
+            - name: OVERRIDE_HOSTNAME
+              value: "{{ .Values.hostname }}"
+            {{- if .Values.letsEncrypt.enabled }}
+            - name: SSL_TYPE
+              value: 'manual'
+            - name: SSL_CERT_PATH
+              value: '/etc/ssl/mailserver/tls.crt'
+            - name: SSL_KEY_PATH
+              value: '/etc/ssl/mailserver/tls.key'
+            {{- end }}
+            {{- range $key, $value :=  .Values.env }}
+            - name: {{ $key | upper | replace "-" "_" }}
+              value: '{{ $value }}'
+            {{- end }}
+          volumeMounts:
+            {{- if .Values.letsEncrypt.enabled }}
+            - name: tls
+              mountPath: /etc/ssl/mailserver
+              readOnly: true
+            {{- end }}
+            - name: config
+              subPath: SigningTable
+              mountPath: /tmp/docker-mailserver/opendkim/SigningTable
+              readOnly: true
+            - name: config
+              subPath: KeyTable
+              mountPath: /tmp/docker-mailserver/opendkim/KeyTable
+              readOnly: true
+            - name: config
+              subPath: TrustedHosts
+              mountPath: /tmp/docker-mailserver/opendkim/TrustedHosts
+              readOnly: true
+            - name: opendkim-keys
+              mountPath: /tmp/docker-mailserver/opendkim/keys
+              readOnly: true
+            - name: config
+              subPath: postfix-accounts.cf
+              mountPath: /tmp/docker-mailserver/postfix-accounts.cf
+              readOnly: true
+            - name: config
+              subPath: postfix-virtual.cf
+              mountPath: /tmp/docker-mailserver/postfix-virtual.cf
+              readOnly: true
+            - name: config
+              subPath: postfix-main.cf
+              mountPath: /tmp/docker-mailserver/postfix-main.cf
+              readOnly: true
+            - name: config
+              subPath: dovecot.cf
+              mountPath: /tmp/docker-mailserver/dovecot.cf
+              readOnly: true
+            - name: data
+              mountPath: /var/mail
+              subPath: mail
+            - name: data
+              mountPath: /var/mail-state
+              subPath: mail-state
+      volumes:
+        - name: config
+          configMap:
+            name: {{ template "fullname" . }}
+        - name: data
+        {{- if .Values.persistentVolume.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ if .Values.persistentVolume.existingClaim }}{{ .Values.persistentVolume.existingClaim }}{{- else }}{{ template "fullname" . }}{{- end }}
+        {{- else }}
+          emptyDir: {}
+        {{- end -}}
+        {{- if .Values.letsEncrypt.enabled }}
+        - name: tls
+          secret:
+            secretName: {{ template "fullname" . }}-tls
+        {{- end }}
+        - name: opendkim-keys
+          secret:
+            secretName: {{ template "fullname" . }}-opendkim

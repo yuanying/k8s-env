@@ -15,6 +15,8 @@ $ export NODE_ADDRESS_PREFIX=192.168.200 # Specify Node address prefix
 $ export NODE_NETWORK_RANGE=16 # Specify Node network range
 $ export NODE_GATEWAY=192.168.11.1 # Specify default gateway
 $ export NODE_DNS=192.168.11.1 # Specify DNS server address
+$ # Specify OS image
+$ export NODE_IMAGE="/var/lib/libvirt/images/ubuntu-xenial-docker-ec2-noclouds.qcow2"
 $ bash tools/node-up.sh tools/envs/master01.sh # Start master01 server
 $ bash tools/node-up.sh tools/envs/worker01.sh # Start worker01 server
 ```

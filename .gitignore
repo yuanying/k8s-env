@@ -69,3 +69,6 @@ tools/userdata/*.yaml
 .DS_Store
 
 tools/userdata/*.yaml
+
+private
+fabric/configs/cluster.yaml

@@ -1,1 +1,4 @@
 ---
+provisioner:
+  image:
+    repository: yuanying/glusterfs-simple-provisioner

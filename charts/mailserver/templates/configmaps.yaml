@@ -27,6 +27,7 @@ data:
   dovecot.cf: |
     recipient_delimiter = -
     {{- if .Values.proxyProtocol.enabled }}
+    haproxy_trusted_networks = {{ .Values.proxyProtocol.trustedProxyNetwork }}
     service imap-login {
       inet_listener imaps {
         haproxy = yes

@@ -44,6 +44,7 @@ kpartx -av ${loop_device}
 mount /dev/mapper/${device_basename}p9 ${rootfs}
 
 echo "---> Copying userdata..."
+mkdir -p ${rootfs}/var/lib/coreos-install
 cat <<EOF > ${rootfs}/var/lib/coreos-install/user_data
 #cloud-config
 ---

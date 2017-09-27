@@ -82,9 +82,24 @@ def mount():
                 },
                 use_jinja=True,
             )
+            files.upload_template(
+                'mount.automount',
+                '/etc/systemd/system/{}.automount'.format(unitname),
+                use_sudo=True,
+                backup=False,
+                template_dir=os.path.join(
+                    helpers.__fabric_lib_dir, 'templates'
+                ),
+                context={
+                    'source': source,
+                    'dest': mountpath,
+                },
+                use_jinja=True,
+            )
             sudo(
-                "systemctl enable {unitname}.mount && "
-                "systemctl restart {unitname}.mount".format(
+                "systemctl daemon-reload && "
+                "systemctl enable {unitname}.automount && "
+                "systemctl restart {unitname}.automount".format(
                     unitname=unitname,
                 )
             )
@@ -100,8 +115,15 @@ def umount():
             mountpath = os.path.join("/var/lib/heketi", basename)
             unitname = "-".join(mountpath.split("/")[1:])
             sudo(
+                "systemctl stop {unitname}.automount && "
+                "systemctl disable {unitname}.automount && "
                 "systemctl stop {unitname}.mount && "
                 "systemctl disable {unitname}.mount".format(
+                    unitname=unitname,
+                )
+            )
+            sudo(
+                "rm -rf '/etc/systemd/system/{unitname}.*'".format(
                     unitname=unitname,
                 )
             )

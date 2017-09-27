@@ -1,0 +1,7 @@
+[Unit]
+Description=Automount {{ source }}
+[Automount]
+Where={{ dest }}
+[Install]
+WantedBy=multi-user.target
+WantedBy=docker.service

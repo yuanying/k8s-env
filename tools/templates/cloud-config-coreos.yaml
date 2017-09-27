@@ -30,7 +30,7 @@ coreos:
     - name: systemd-networkd.service
       command: stop
     - name: 00-${NODE_NET_DEVICE}.network
-      runtime: true
+      command: start
       content: |
         [Match]
         Name=${NODE_NET_DEVICE}

@@ -1,3 +1,5 @@
+[Unit]
+Description=Mount {{ source }}
 [Mount]
 What={{ source }}
 Where={{ dest }}

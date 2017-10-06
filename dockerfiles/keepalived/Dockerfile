@@ -1,4 +1,4 @@
-# docker build -t yuanying/keepalived .
+# docker build -t yuanying/keepalived:v0.2.1 .
 # docker run --privileged yuanying/keepalived
 
 FROM alpine:latest

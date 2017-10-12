@@ -5,7 +5,7 @@ FROM ubuntu:16.04
 MAINTAINER OTSUKA, Yuanying "yuan-docker@fraction.jp"
 
 RUN apt-get update && \
-    apt-get install -y openssh-server curl vim dnsutils jq && \
+    apt-get install -y openssh-server curl vim dnsutils jq rsync && \
     apt-get clean && \
     mkdir /var/run/sshd && \
     mkdir /root/.ssh

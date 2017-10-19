@@ -89,6 +89,10 @@ spec:
               subPath: dovecot.cf
               mountPath: /tmp/docker-mailserver/dovecot.cf
               readOnly: true
+            - name: config
+              subPath: spamassassin-rules.cf
+              mountPath: /tmp/docker-mailserver/spamassassin-rules.cf
+              readOnly: true
             - name: data
               mountPath: /var/mail
               subPath: mail

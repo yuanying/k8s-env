@@ -1,0 +1,26 @@
+---
+controller:
+  hostNetwork: true
+  kind: DaemonSet
+  nodeSelector:
+    ingressnode: nginx
+  service:
+    type: ClusterIP
+  stats:
+    enabled: true
+  # config:
+  #   proxy-real-ip-cidr: "192.168.200.0/24"
+  image:
+    repository: gcr.io/google_containers/nginx-ingress-controller
+    tag: "0.9.0-beta.12"
+
+rbac:
+  create: true
+
+tcp:
+  25: "default/ma0-mailserver:25"
+  587: "default/ma0-mailserver:587"
+  993: "default/ma0-mailserver:993"
+  # 25: "default/ma0-mailserver:25:PROXY"
+  # 587: "default/ma0-mailserver:587:PROXY"
+  # 993: "default/ma0-mailserver:993:PROXY"

@@ -1,0 +1,34 @@
+externalUrl: http://gitlab.vanilla.life
+gitlabRootPassword: P@ssw0rd
+serviceType: ClusterIP
+
+ingress:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    kubernetes.io/tls-acme: 'true'
+  enabled: true
+  tls:
+    - secretName: gitlab.vanilla.life
+      hosts:
+        - gitlab.vanilla.life
+  url: gitlab.vanilla.life
+
+persistence:
+  gitlabEtc:
+    size: 1Gi
+    storageClass: slow
+  gitlabData:
+    size: 10Gi
+    storageClass: slow
+
+postgresql:
+  postgresUser: gitlab
+  postgresPassword: P@ssw0rd
+  postgresDatabase: gitlab
+  persistence:
+    storageClass: slow
+
+redis:
+  redisPassword: "password"
+  persistence:
+    storageClass: slow

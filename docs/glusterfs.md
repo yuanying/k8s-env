@@ -5,7 +5,7 @@
 ### Namespace
 
 ```bash
-$ kubectl applif -f manifests/namespaces/glusterfs.yaml
+$ kubectl apply -f manifests/namespaces/glusterfs.yaml
 $ kubectl config set-context cluster --namespace storage
 ```
 

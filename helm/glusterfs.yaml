@@ -2,3 +2,9 @@
 provisioner:
   image:
     repository: yuanying/glusterfs-simple-provisioner
+
+gluster:
+  image:
+    repository: gluster/gluster-centos@sha256
+    tag: 5e86156d721ddeaf75972299efd000794cf7bc3da8cbd5aae4ddfd73e36c4534
+    pullPolicy: IfNotPresent

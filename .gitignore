@@ -71,5 +71,5 @@ tools/userdata/*.yaml
 tools/userdata/*.yaml
 
 private
-configs
+configs*
 fabric/configs/cluster.yaml

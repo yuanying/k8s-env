@@ -1,0 +1,33 @@
+---
+image:
+  tag: 1.0.1-ce
+env:
+  HMD_DOMAIN: {{ hackmd.domain }}
+  HMD_PROTOCOL_USESSL: "true"
+  HMD_URL_ADDPORT: "false"
+  HMD_ALLOW_FREEURL: "true"
+  HMD_ALLOW_ANONYMOUS: "true"
+  HMD_GITHUB_CLIENTID: "{{ hackmd.github.client_id }}"
+  HMD_GITHUB_CLIENTSECRET: "{{ hackmd.github.secret }}"
+  HMD_EMAIL: "false"
+  HMD_ALLOW_EMAIL_REGISTER: "false"
+  HMD_IMAGE_UPLOAD_TYPE: "filesystem"
+
+ingress:
+  enabled: true
+  hosts:
+    - {{ hackmd.domain }}
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    kubernetes.io/tls-acme: "true"
+  tls:
+    - secretName: hackmd-tls
+      hosts:
+        - {{ hackmd.domain }}
+
+postgresql:
+  persistence:
+    existingClaim: "hackmd-postgres"
+
+persistentVolume:
+  existingClaim: "hackmd"

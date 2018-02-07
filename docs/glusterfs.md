@@ -19,7 +19,6 @@ $ fab -f fabric/fabfile.py cluster mount
 ### Deploy glusterfs
 
 ```bash
-$ bash bin/gluster-label-storage-node.sh
 $ helm install ./charts/glusterfs -n gfs \
   -f helm/glusterfs.yaml \
   --namespace storage
@@ -28,7 +27,7 @@ $ helm install ./charts/glusterfs -n gfs \
 ### Configure the Gluster trusted pool
 
 ```bash
-$ bash bin/gluster-configure-trusted-pool.sh
+$ bash configs/bin/configure-gluster-trusted-pool.sh
 ```
 
 ### Create storage class

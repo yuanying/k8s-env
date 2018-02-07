@@ -1,9 +1,3 @@
-# k8s-env
-Environment files for my k8s cluster
-
-Write config file like below:
-
-```
 ---
 user: core
 
@@ -79,22 +73,3 @@ ingress:
 domains:
   fraction.jp: "192.168.1.101"
   lazy.work: "192.168.1.101"
-
-```
-
-And generate manifests and utility scripts from templates:
-
-```
-$ python templates/bin/render.py ${PATH_TO_CONFIG_YAML_ABOVE}
-```
-
-Now you can
-
--   [Setup hosts](docs/hosts.md)
--   [Install helm](docs/helm.md)
--   [Install CoreDNS](docs/coredns.md)
--   [Install GlusterFS](docs/glusterfs.md)
--   [Install Nginx Ingress Controller](docs/ingress.md)
--   [Install HackMD](docs/hackmd.md)
--   [Install ownCloud](docs/owncloud.md)
--   [Install GitLab](docs/gitlab.md)

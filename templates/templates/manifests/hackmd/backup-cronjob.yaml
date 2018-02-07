@@ -1,0 +1,76 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  annotations:
+    volume.beta.kubernetes.io/storage-class: "large"
+  labels:
+    use: "hackmd"
+  name: "hackmd-backup"
+  namespace: "hackmd"
+spec:
+  storageClassName: "large"
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: "10Gi"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    name: hackmd
+  name: hackmd-backup
+  namespace: hackmd
+data:
+  backup.sh: |
+    #!/bin/bash
+
+    PERIOD='+10'
+    DATE=`date '+%Y%m%d-%H%M%S'`
+    SAVEPATH='/var/backup/'
+    PREFIX='postgres-'
+    EXT='.sql'
+    DBNAME='hackmd'
+    export PGHOST='hmd0-postgresql.hackmd.svc.cluster.local'
+    export PGPORT='5432'
+    export PGUSER='hackmd'
+    export PGPASSWORD='hackmdpass'
+
+    pg_dump $DBNAME > $SAVEPATH$PREFIX$DATE$EXT
+
+    find $SAVEPATH -type f -daystart -mtime $PERIOD -exec rm {} \;
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  labels:
+    name: hackmd
+  name: hackmd-backup
+  namespace: hackmd
+spec:
+  schedule: "1 0 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: backup
+            image: postgres:9.6.2
+            args:
+            - /bin/bash
+            - /var/bin/backup.sh
+            volumeMounts:
+            - name: script
+              mountPath: /var/bin
+            - name: data
+              mountPath: /var/backup
+          restartPolicy: Never
+          volumes:
+          - name: script
+            configMap:
+              name: hackmd-backup
+          - name: data
+            persistentVolumeClaim:
+              claimName: hackmd-backup

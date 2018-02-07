@@ -1,0 +1,30 @@
+---
+controller:
+  hostNetwork: true
+  kind: DaemonSet
+  nodeSelector:
+    ingressnode: nginx
+  tolerations:
+  - key: CriticalAddonsOnly
+    operator: Exists
+  - key: node-role.kubernetes.io/master
+    operator: Exists
+    effect: NoSchedule
+  service:
+    type: ClusterIP
+  stats:
+    enabled: true
+  config:
+    proxy-real-ip-cidr: "{{ ingress.proxy_real_ip_cidr }}"
+  image:
+    repository: quay.io/kubernetes-ingress-controller/nginx-ingress-controller
+    tag: "0.9.0"
+
+rbac:
+  create: true
+{% if ingress.tcp %}
+tcp:
+  {%- for port, service in ingress.tcp.items() %}
+  {{ port }}: "{{ service }}"
+  {%- endfor %}
+{%- endif %}

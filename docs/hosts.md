@@ -1,11 +1,12 @@
 # Setup hosts
 
+## Label nodes
+
 ```bash
-$ ln -s $GOPATH/src/github.com/yuanying/k8s-env/configs/cluster.yaml \
-        $GOPATH/src/github.com/yuanying/k8s-env/fabric/configs/cluster.yaml
+$ bash configs/bin/label-nodes.sh
 ```
 
-## Setup HAproxy
+## Setup HAproxy (if you want)
 
 ```bash
 $ sudo bash configs/docker/haproxy.sh

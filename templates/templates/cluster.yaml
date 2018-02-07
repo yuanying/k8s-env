@@ -1,0 +1,18 @@
+---
+user: {{ user }}
+
+hosts:
+{% for node, spec in nodes.items() -%}
+- {{ node }}
+{% endfor %}
+
+devices:
+{%- for node, spec in nodes.items() -%}
+  {%- if spec.devices %}
+  {{ node }}:
+  {%- for dev in spec.devices %}
+  - path: {{ dev.path }}
+    name: {{ dev.name }}
+  {%- endfor %}
+  {%- endif -%}
+{% endfor %}

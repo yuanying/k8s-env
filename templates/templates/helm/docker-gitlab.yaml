@@ -1,0 +1,33 @@
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    kubernetes.io/tls-acme: 'true'
+  hosts:
+    - {{ gitlab.domain }}
+  tls:
+    - secretName: gitlab-server-tls
+      hosts:
+        - {{ gitlab.domain }}
+
+gitlab:
+  host: "{{ gitlab.domain }}"
+
+resources:
+  requests:
+    memory: 6Gi
+    cpu: 2
+  limits:
+    memory: 12Gi
+    cpu: 8
+
+redis:
+  persistence:
+    existingClaim: "gitlab-redis"
+
+postgresql:
+  persistence:
+    existingClaim: "gitlab-postgres"
+
+persistentVolume:
+  existingClaim: "gitlab"

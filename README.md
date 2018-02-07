@@ -77,8 +77,10 @@ ingress:
     993: "mail/ma0-mailserver:993"
 
 domains:
-  fraction.jp: "192.168.1.101"
-  lazy.work: "192.168.1.101"
+  fraction.jp:
+    address: "192.168.1.101"
+  lazy.work:
+    address: "192.168.1.101"
 
 ```
 

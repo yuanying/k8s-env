@@ -72,3 +72,4 @@ tools/userdata/*.yaml
 
 private
 /configs*
+/templates/configs/*

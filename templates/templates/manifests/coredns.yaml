@@ -50,7 +50,7 @@ data:
         health
         cache 30
     }
-{%- for domain, ip in domains.items() %}
+{%- for domain, spec in domains.items() %}
   {{ domain }}.db: |-
     @       IN      SOA     ns.{{ domain }}. root.{{ domain }}. (
             2008082901
@@ -60,8 +60,8 @@ data:
             86400 )
 
                     IN      NS              ns.{{ domain }}.
-                    IN      A               {{ ip }}
-    *               IN      A               {{ ip }}
+                    IN      A               {{ spec.address }}
+    *               IN      A               {{ spec.address }}
 {%- endfor %}
 ---
 apiVersion: extensions/v1beta1

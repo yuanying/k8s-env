@@ -18,7 +18,7 @@ controller:
     proxy-real-ip-cidr: "{{ ingress.proxy_real_ip_cidr }}"
   image:
     repository: quay.io/kubernetes-ingress-controller/nginx-ingress-controller
-    tag: "0.9.0"
+    tag: "0.10.2"
 
 rbac:
   create: true

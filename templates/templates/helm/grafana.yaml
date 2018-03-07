@@ -1,0 +1,16 @@
+---
+server:
+  image: "grafana/grafana:4.6.3"
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      kubernetes.io/tls-acme: 'true'
+    hosts:
+      - {{ grafana.domain }}
+    tls:
+      - secretName: grafana-server-tls
+        hosts:
+          - {{ grafana.domain }}
+  persistentVolume:
+    existingClaim: "grafana"

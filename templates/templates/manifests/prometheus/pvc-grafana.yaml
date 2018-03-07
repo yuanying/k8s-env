@@ -1,0 +1,17 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  annotations:
+    volume.beta.kubernetes.io/storage-class: "large"
+  labels:
+    use: "grafana"
+  name: "grafana"
+  namespace: "prometheus"
+spec:
+  storageClassName: "large"
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: "10Gi"

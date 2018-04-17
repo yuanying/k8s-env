@@ -1,7 +1,7 @@
 {{- if .Values.gluster.enabled -}}
 ---
 kind: DaemonSet
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 metadata:
   name: {{ template "fullname" . }}-gluster
   labels:

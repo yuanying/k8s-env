@@ -1,5 +1,5 @@
 {{- if .Values.letsEncrypt.enabled -}}
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Ingress
 metadata:
 {{- if .Values.letsEncrypt.ingress.annotations }}

@@ -1,3 +1,0 @@
----
-env:
-  ELASTICSEARCH_URL: "http://escluster-elasticsearch:9200"

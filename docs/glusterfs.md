@@ -12,7 +12,6 @@ $ kubectl config set-context cluster --namespace storage
 ### Mount storage devices
 
 ```bash
-$ fab -f fabric/fabfile.py cluster mount.format
 $ fab -f fabric/fabfile.py cluster mount
 ```
 

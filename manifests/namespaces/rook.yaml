@@ -1,0 +1,6 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: rook-system
+  labels:
+    name: rook-system

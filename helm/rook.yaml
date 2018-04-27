@@ -1,0 +1,6 @@
+hyperkube:
+  repository: gcr.io/google_containers/hyperkube
+  tag: v1.9.6
+
+agent:
+  flexVolumeDirPath: /var/lib/kubelet/volumeplugins

@@ -11,6 +11,11 @@ metadata:
 spec:
   strategy:
     type: Recreate
+  selector:
+    matchLabels:
+      app: {{ template "fullname" . }}
+      component: "{{ .Values.name }}"
+      release: {{ .Release.Name }}
   template:
     metadata:
       labels:

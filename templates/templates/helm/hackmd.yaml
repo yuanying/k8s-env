@@ -36,6 +36,7 @@ ingress:
         - {{ hackmd.domain }}
 
 postgresql:
+  postgresPassword: "{{ hackmd.postgresql.postgresPassword }}"
   persistence:
     existingClaim: "{{ hackmd.postgresql.existingClaim }}"
 

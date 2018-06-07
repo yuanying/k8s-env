@@ -16,7 +16,7 @@ $ ghq get yuanying/charts
 $ cd $GOPATH/src/github.com/yuanying/charts/incubator/hackmd/
 $ helm dep up .
 $ cd -
-$ helm install $GOPATH/src/github.com/yuanying/charts/incubator/hackmd \
+$ helm install stable/hackmd \
   --name hmd0 -f configs/helm/hackmd.yaml \
   --namespace hackmd
 ```
@@ -24,6 +24,6 @@ $ helm install $GOPATH/src/github.com/yuanying/charts/incubator/hackmd \
 ## Update
 
 ```bash
-$ helm upgrade hmd0 $GOPATH/src/github.com/yuanying/charts/incubator/hackmd \
+$ helm upgrade hmd0 stable/hackmd \
   -f configs/helm/hackmd.yaml --force
 ```

@@ -14,6 +14,7 @@ $ kubectl config set-context cluster --namespace ingress
 ```bash
 $ bash bin/nginx-label-ingress-node.sh
 $ helm install -n ing stable/nginx-ingress \
+  --version 0.20.1 \
   -f configs/helm/nginx-ingress.yaml \
   --namespace ingress
 $ helm install -n certs stable/kube-lego \
@@ -25,6 +26,7 @@ $ helm install -n certs stable/kube-lego \
 
 ```bash
 $ helm upgrade ing stable/nginx-ingress \
+  --version 0.20.1 \
   -f configs/helm/nginx-ingress.yaml \
   --recreate-pods
 $ helm upgrade certs stable/kube-lego \

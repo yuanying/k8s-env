@@ -1,24 +1,17 @@
 ---
 controller:
   hostNetwork: true
-  kind: DaemonSet
-  nodeSelector:
-    ingressnode: nginx
-  tolerations:
-  - key: CriticalAddonsOnly
-    operator: Exists
-  - key: node-role.kubernetes.io/master
-    operator: Exists
-    effect: NoSchedule
+  kind: Deployment
   service:
-    type: ClusterIP
+    type: LoadBalancer
+    loadBalancerIP: "{{ ingress.loadBalancerIP }}"
   stats:
     enabled: true
-  config:
-    proxy-real-ip-cidr: "{{ ingress.proxy_real_ip_cidr }}"
+  # config:
+  #   proxy-real-ip-cidr: "{{ ingress.proxy_real_ip_cidr }}"
   image:
     repository: quay.io/kubernetes-ingress-controller/nginx-ingress-controller
-    tag: "0.10.2"
+    tag: "0.14.0"
 
 rbac:
   create: true

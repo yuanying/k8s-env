@@ -37,7 +37,7 @@ ingress:
 
 postgresql:
   persistence:
-    existingClaim: "hackmd-postgres"
+    existingClaim: "{{ hackmd.postgresql.existingClaim }}"
 
 persistence:
-  existingClaim: "hackmd"
+  existingClaim: "{{ hackmd.existingClaim }}"

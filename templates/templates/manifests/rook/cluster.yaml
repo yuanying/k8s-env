@@ -1,24 +1,27 @@
+#apiVersion: ceph.rook.io/v1alpha1
 apiVersion: rook.io/v1alpha1
 kind: Cluster
 metadata:
-  name: rook
-  namespace: rook
+  name: rook-ceph
+  namespace: rook-ceph
 spec:
+  dashboard:
+    enabled: true
   dataDirHostPath: /var/lib/rook
   storage:
     useAllNodes: false
     useAllDevices: false
     storeConfig:
-      # storeType: bluestore
+      storeType: bluestore
       databaseSizeMB: 1024
       journalSizeMB: 1024
     nodes:
 {%- for node,spec in nodes.items() -%}
   {%- if spec.devices %}
       - name: "{{ node }}"
-        directories:
+        devices:
         {%- for dev in spec.devices %}
-        - path: "/var/lib/heketi/{{ dev.name }}"
+        - name: "{{ dev.deviceName }}"
         {%- endfor %}
   {%- endif -%}
 {% endfor -%}

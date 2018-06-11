@@ -1,6 +1,47 @@
+# Default values for rook-ceph-operator.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+image:
+  prefix: rook
+  repository: rook/rook
+  # tag: v0.7.0-182.gcd746df
+  pullPolicy: IfNotPresent
+
 hyperkube:
   repository: gcr.io/google_containers/hyperkube
-  tag: v1.9.6
+  tag: v1.9.8
+  pullPolicy: IfNotPresent
 
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+mon:
+  healthCheckInterval: "45s"
+  monOutTimeout: "300s"
+
+## LogLevel can be set to: TRACE, DEBUG, INFO, NOTICE, WARNING, ERROR or CRITICAL
+logLevel: DEBUG
+
+## If true, create & use RBAC resources
+##
+rbacEnable: true
+
+## If true, create & use PSP resources
+##
+pspEnable: true
+
+## Rook Agent configuration
+## toleration: NoSchedule, PreferNoSchedule or NoExecute
+## tolerationKey: Set this to the specific key of the taint to tolerate
+## flexVolumeDirPath: The path where the Rook agent discovers the flex volume plugins
 agent:
-  flexVolumeDirPath: /var/lib/kubelet/volumeplugins
+#   toleration: NoSchedule
+#   tolerationKey: key
+## For Kubernetes >= 1.9.x flexVolumeDirPath should be changed to /var/lib/kubelet/volumeplugins/
+  flexVolumeDirPath: /var/lib/kubelet/volumeplugins/

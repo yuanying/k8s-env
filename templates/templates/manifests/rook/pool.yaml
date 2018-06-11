@@ -1,0 +1,13 @@
+#apiVersion: ceph.rook.io/v1alpha1
+apiVersion: rook.io/v1alpha1
+kind: Pool
+metadata:
+  name: ecpool
+  namespace: rook-ceph
+spec:
+  replicated:
+  #  size: 3
+  erasureCoded:
+    dataChunks: 2
+    codingChunks: 1
+  crushRoot: default

@@ -1,5 +1,5 @@
-#apiVersion: ceph.rook.io/v1alpha1
-apiVersion: rook.io/v1alpha1
+apiVersion: ceph.rook.io/v1alpha1
+# apiVersion: rook.io/v1alpha1
 kind: Cluster
 metadata:
   name: rook-ceph

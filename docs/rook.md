@@ -18,14 +18,14 @@ $ fab -f fabric/fabfile.py cluster mount
 ### Chart
 
 ```bash
-$ helm repo add rook-master https://charts.rook.io/alpha
+$ helm repo add rook-master https://charts.rook.io/master
 ```
 ### Deploy rook-operator
 
 ```bash
-$ helm install rook-alpha/rook -n ro0 \
+$ helm install rook-master/rook-ceph -n ro0 \
   -f helm/rook.yaml \
-  --version v0.7.1 \
+  --version v0.7.0-184.gb4e9eba \
   --namespace rook-ceph-system
 ```
 
@@ -39,7 +39,7 @@ $ kubectl apply -f configs/manifests/rook/
 
 ```bash
 $ helm upgrade ro0 \
-  rook-alpha/rook \
-  --version v0.7.1 \
+  rook-master/rook-ceph \
+  --version v0.7.0-184.gb4e9eba \
   -f helm/rook.yaml
 ```

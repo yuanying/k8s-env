@@ -281,6 +281,9 @@ metadata:
     storage-backend: ceph
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: rook-ceph-operator
   template:
     metadata:
       labels:

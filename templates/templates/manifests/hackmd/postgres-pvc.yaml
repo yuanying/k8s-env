@@ -9,7 +9,7 @@ metadata:
   name: "hackmd-postgres"
   namespace: "hackmd"
 spec:
-  storageClassName: "slow"
+  storageClassName: "rook-ceph-block"
   accessModes:
     - ReadWriteMany
   resources:

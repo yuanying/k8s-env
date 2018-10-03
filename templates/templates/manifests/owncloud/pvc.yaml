@@ -36,14 +36,12 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  annotations:
-    volume.beta.kubernetes.io/storage-class: "slow"
   labels:
     use: "owncloud-mariadb"
   name: "owncloud-mariadb"
   namespace: "owncloud"
 spec:
-  storageClassName: "slow"
+  storageClassName: "rook-ceph-block"
   accessModes:
     - ReadWriteMany
   resources:

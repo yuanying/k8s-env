@@ -1,0 +1,9 @@
+---
+apiVersion: ceph.rook.io/v1beta1
+kind: Pool
+metadata:
+  name: replicated-pool
+  namespace: rook-ceph
+spec:
+  replicated:
+    size: 3

@@ -53,7 +53,7 @@ metadata:
 spec:
   dashboard:
     enabled: true
-  dataDirHostPath: /var/lib/rook
+  dataDirHostPath: /var/lib/rook-ceph
   serviceAccount: rook-ceph-cluster
   mon:
     count: 3

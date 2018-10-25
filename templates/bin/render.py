@@ -10,7 +10,6 @@ from jinja2 import Environment, FileSystemLoader
 
 
 ROOT_PATH = os.path.join(os.path.dirname(__file__), '..')
-TARGET_PATH = os.path.join(ROOT_PATH, '..', 'configs')
 
 def main(argv):
     try:
@@ -25,13 +24,15 @@ def main(argv):
         loader=FileSystemLoader(os.path.join(ROOT_PATH, 'templates'),
         encoding='utf8'),
     )
+    target_path = config_file['target_dir']
+    target_path = os.path.expanduser(target_path)
 
     for t in env.list_templates():
         try:
             template = env.get_template(t)
             content = template.render(config_file)
-            target_dir = os.path.join(TARGET_PATH, os.path.dirname(t))
-            target_file = os.path.join(TARGET_PATH, t)
+            target_dir = os.path.join(target_path, os.path.dirname(t))
+            target_file = os.path.join(target_path, t)
             print(target_dir)
             print(target_file)
             pathlib.Path(target_dir).mkdir(parents=True, exist_ok=True)

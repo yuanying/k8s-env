@@ -167,7 +167,7 @@ spec:
       volumes:
       - name: config-volume
         configMap:
-          name: core-dns
+          name: coredns
 ---
 apiVersion: v1
 kind: Service

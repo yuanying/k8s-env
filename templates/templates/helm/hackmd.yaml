@@ -1,32 +1,33 @@
 ---
 image:
-  tag: 1.0.1-ce-alpine
+  tag: 1.2.1-alpine
 extraVars:
-  - name: HMD_DOMAIN
+  - name: CMD_DOMAIN
     value: {{ hackmd.domain }}
-  - name: HMD_PROTOCOL_USESSL
+  - name: CMD_PROTOCOL_USESSL
     value: "true"
-  - name: HMD_URL_ADDPORT
+  - name: CMD_URL_ADDPORT
     value: "false"
-  - name: HMD_ALLOW_FREEURL
+  - name: CMD_ALLOW_FREEURL
     value: "true"
-  - name: HMD_ALLOW_ANONYMOUS
+  - name: CMD_ALLOW_ANONYMOUS
     value: "true"
-  - name: HMD_GITHUB_CLIENTID
+  - name: CMD_GITHUB_CLIENTID
     value: "{{ hackmd.github.client_id }}"
-  - name: HMD_GITHUB_CLIENTSECRET
+  - name: CMD_GITHUB_CLIENTSECRET
     value: "{{ hackmd.github.secret }}"
-  - name: HMD_EMAIL
+  - name: CMD_EMAIL
     value: "false"
-  - name: HMD_ALLOW_EMAIL_REGISTER
+  - name: CMD_ALLOW_EMAIL_REGISTER
     value: "false"
-  - name: HMD_IMAGE_UPLOAD_TYPE
+  - name: CMD_IMAGE_UPLOAD_TYPE
     value: "filesystem"
 
 ingress:
   enabled: true
   hosts:
     - {{ hackmd.domain }}
+{%- if ingress.tls %}
   annotations:
     kubernetes.io/ingress.class: nginx
     kubernetes.io/tls-acme: "true"
@@ -34,6 +35,7 @@ ingress:
     - secretName: hackmd-tls
       hosts:
         - {{ hackmd.domain }}
+{%- endif %}
 
 postgresql:
   postgresPassword: "{{ hackmd.postgresql.postgresPassword }}"

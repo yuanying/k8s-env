@@ -36,16 +36,21 @@ workld_media_wear_indic
 workload_minutes
 )
 
-
+print <<-EOF
+- name: smart
+  rules:
+EOF
 values.each do |small_char|
   large_char = small_char.upcase
   print <<-EOF
-  ALERT #{large_char}_INVALID
-    IF #{small_char}_threshold - #{small_char}_value > 0
-    FOR 30s
-    ANNOTATIONS {
-      summary = "Abnormal state of #{small_char}_value",
-      description = "Abnormal state on {{$labels.instance}} for disk {{$labels.name}} (current value: {{$value}})"
-    }
+  - alert: #{large_char}_INVALID
+    expr: smartmon_#{small_char}_threshold - smartmon_#{small_char}_value > 0
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      text: "Abnormal state of #{small_char}_value"
+      summary: "Abnormal state of #{small_char}_value"
+      description: "Abnormal state on {{$labels.instance}} for disk {{$labels.name}} (current value: {{$value}})"
   EOF
 end

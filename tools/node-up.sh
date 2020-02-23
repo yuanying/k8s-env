@@ -56,7 +56,7 @@ ethernets:
     addresses: [${NODE_ADDRESS}/${NODE_NETWORK_RANGE}]
     gateway4: ${NODE_GATEWAY}
     nameservers:
-    addresses: ["${NODE_DNS}"]
+      addresses: ["${NODE_DNS}"]
 EOF
 # sudo mkisofs -R -V config-2 -o ${CONFIG_DRIVE_PATH} ${LIBVIRT_PATH}/${NODE_HOSTNAME}
 sudo genisoimage -output ${CONFIG_DRIVE_PATH} -volid cidata -joliet -rock \

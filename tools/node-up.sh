@@ -10,17 +10,18 @@ if [[ ${NODE_ENV} != '' ]]; then
     source ${NODE_ENV}
 fi
 
-
-NODE_UUID=${NODE_UUID:-$(uuidgen)}
-NODE_HOSTNAME=${NODE_HOSTNAME:-$1}
-NODE_CPU=${NODE_CPU:-'2'}
-NODE_MEMORY=${NODE_MEMORY:-'2048'}
-NODE_DISK=${NODE_DISK:-'40'}
-NODE_ADDITIONAL_DISKS=${NODE_ADDITIONAL_DISKS:-''}
-NODE_NETWORK_HOST_BRIDGE=${NODE_NETWORK_HOST_BRIDGE:-'br0'}
-NODE_IMAGE=${NODE_IMAGE:-'/var/lib/libvirt/images/ubuntu-xenial-docker-ec2-noclouds.qcow2'}
-NODE_USERDATA=${NODE_USERDATA:-'~/cloud.yaml'}
-
+export NODE_UUID=${NODE_UUID:-$(uuidgen)}
+export NODE_HOSTNAME=${NODE_HOSTNAME:-$1}
+export NODE_CPU=${NODE_CPU:-'2'}
+export NODE_MEMORY=${NODE_MEMORY:-'2048'}
+export NODE_DISK=${NODE_DISK:-'40'}
+export NODE_ADDITIONAL_DISKS=${NODE_ADDITIONAL_DISKS:-''}
+export NODE_NETWORK_HOST_BRIDGE=${NODE_NETWORK_HOST_BRIDGE:-'br0'}
+export NODE_IMAGE=${NODE_IMAGE:-'/var/lib/libvirt/images/ubuntu-xenial-docker-ec2-noclouds.qcow2'}
+export NODE_USERDATA=${NODE_USERDATA:-'~/cloud.yaml'}
+export NODE_OS_DISTRO=${NODE_OS_DISTRO:-'ubuntu'}
+export NODE_HOSTNAME=${NODE_HOSTNAME:-'master'}
+export NODE_ADDRESS=${NODE_ADDRESS:-'192.168.203.11'}
 
 if [[ ${NODE_ENV} != '' ]]; then
     echo "Generate userdata: ${NODE_USERDATA}"
@@ -36,18 +37,33 @@ fi
 
 echo "Setup USERDATA: ${NODE_HOSTNAME} node..."
 
-USERDATA_DIR_PATH=${LIBVIRT_PATH}/${NODE_HOSTNAME}/openstack/latest
+USERDATA_DIR_PATH=${LIBVIRT_PATH}/${NODE_HOSTNAME}/nocloud
 CONFIG_DRIVE_PATH=${LIBVIRT_PATH}/${NODE_HOSTNAME}.iso
 if [ ! -d ${USERDATA_DIR_PATH} ]; then
     sudo mkdir -p ${USERDATA_DIR_PATH} || (echo "Can not create ${USERDATA_DIR_PATH} directory" && exit 1)
 fi
 sudo cp ${NODE_USERDATA} ${USERDATA_DIR_PATH}/user_data
-sudo cat <<EOF | sudo tee ${USERDATA_DIR_PATH}/meta_data.json
-{
-    "uuid": "${NODE_UUID}"
-}
+sudo cat <<EOF | sudo tee ${USERDATA_DIR_PATH}/meta_data
+instance_id: "${NODE_UUID}"
+local-hostname: "${NODE_HOSTNAME}"
 EOF
-sudo mkisofs -R -V config-2 -o ${CONFIG_DRIVE_PATH} ${LIBVIRT_PATH}/${NODE_HOSTNAME}
+sudo cat <<EOF | sudo tee ${USERDATA_DIR_PATH}/network-config
+network:
+  version: 2
+  ethernets:
+    ${NODE_NET_DEVICE}:
+      dhcp4: no
+      dhcp6: no
+      addresses: [${NODE_ADDRESS}/${NODE_NETWORK_RANGE}]
+      gateway4: ${NODE_GATEWAY}
+      nameservers:
+        addresses: ["${NODE_DNS}"]
+EOF
+# sudo mkisofs -R -V config-2 -o ${CONFIG_DRIVE_PATH} ${LIBVIRT_PATH}/${NODE_HOSTNAME}
+sudo genisoimage -output ${CONFIG_DRIVE_PATH} -volid cidata -joliet -rock \
+    ${USERDATA_DIR_PATH}/user-data \
+    ${USERDATA_DIR_PATH}/meta-data \
+    ${USERDATA_DIR_PATH}/network-config
 USERDATA_DISK="--disk ${CONFIG_DRIVE_PATH},device=cdrom,perms=ro"
 
 echo "Creating: ${NODE_HOSTNAME} node..."

@@ -42,8 +42,8 @@ CONFIG_DRIVE_PATH=${LIBVIRT_PATH}/${NODE_HOSTNAME}.iso
 if [ ! -d ${USERDATA_DIR_PATH} ]; then
     sudo mkdir -p ${USERDATA_DIR_PATH} || (echo "Can not create ${USERDATA_DIR_PATH} directory" && exit 1)
 fi
-sudo cp ${NODE_USERDATA} ${USERDATA_DIR_PATH}/user_data
-sudo cat <<EOF | sudo tee ${USERDATA_DIR_PATH}/meta_data
+sudo cp ${NODE_USERDATA} ${USERDATA_DIR_PATH}/user-data
+sudo cat <<EOF | sudo tee ${USERDATA_DIR_PATH}/meta-data
 instance_id: "${NODE_UUID}"
 local-hostname: "${NODE_HOSTNAME}"
 EOF

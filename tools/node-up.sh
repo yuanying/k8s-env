@@ -48,16 +48,15 @@ instance_id: "${NODE_UUID}"
 local-hostname: "${NODE_HOSTNAME}"
 EOF
 sudo cat <<EOF | sudo tee ${USERDATA_DIR_PATH}/network-config
-network:
-  version: 2
-  ethernets:
-    ${NODE_NET_DEVICE}:
-      dhcp4: no
-      dhcp6: no
-      addresses: [${NODE_ADDRESS}/${NODE_NETWORK_RANGE}]
-      gateway4: ${NODE_GATEWAY}
-      nameservers:
-        addresses: ["${NODE_DNS}"]
+version: 2
+ethernets:
+${NODE_NET_DEVICE}:
+    dhcp4: no
+    dhcp6: no
+    addresses: [${NODE_ADDRESS}/${NODE_NETWORK_RANGE}]
+    gateway4: ${NODE_GATEWAY}
+    nameservers:
+    addresses: ["${NODE_DNS}"]
 EOF
 # sudo mkisofs -R -V config-2 -o ${CONFIG_DRIVE_PATH} ${LIBVIRT_PATH}/${NODE_HOSTNAME}
 sudo genisoimage -output ${CONFIG_DRIVE_PATH} -volid cidata -joliet -rock \

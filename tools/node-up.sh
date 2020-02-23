@@ -50,7 +50,7 @@ EOF
 sudo cat <<EOF | sudo tee ${USERDATA_DIR_PATH}/network-config
 version: 2
 ethernets:
-${NODE_NET_DEVICE}:
+  ${NODE_NET_DEVICE}:
     dhcp4: no
     dhcp6: no
     addresses: [${NODE_ADDRESS}/${NODE_NETWORK_RANGE}]

@@ -19,7 +19,7 @@ runcmd:
 
 apt:
   sources:
-    source1: "deb [arch=amd64] https://download.docker.com/linux/ubuntu $RELEASE stable"
+    source1: "deb [arch=amd64] https://download.docker.com/linux/ubuntu ${NODE_OS_CODENAME} stable"
     key: |
       -----BEGIN PGP PUBLIC KEY BLOCK-----
 

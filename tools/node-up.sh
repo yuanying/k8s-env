@@ -74,7 +74,7 @@ dev_index='b'
 additional_disk=''
 additional_disk_params=''
 for disk_size in ${NODE_ADDITIONAL_DISKS}; do
-    additional_disk=${NODE_ROOT}/${NODE_HOSTNAME}-vd${dev_index}.img
+    additional_disk=${NODE_ROOT}/disk-${NODE_HOSTNAME}-vd${dev_index}.img
     if [ ! -f ${additional_disk} ]; then
         sudo qemu-img create ${additional_disk} ${disk_size}G
     fi

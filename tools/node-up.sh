@@ -17,7 +17,7 @@ export NODE_MEMORY=${NODE_MEMORY:-'2048'}
 export NODE_DISK=${NODE_DISK:-'40'}
 export NODE_ADDITIONAL_DISKS=${NODE_ADDITIONAL_DISKS:-''}
 export NODE_NETWORK_HOST_BRIDGE=${NODE_NETWORK_HOST_BRIDGE:-'br0'}
-export NODE_IMAGE=${NODE_IMAGE:-'/var/lib/libvirt/images/ubuntu-xenial-docker-ec2-noclouds.qcow2'}
+export NODE_IMAGE=${NODE_IMAGE:-"${NODE_ROOT}/ubuntu-xenial-docker-ec2-noclouds.qcow2"}
 export NODE_USERDATA=${NODE_USERDATA:-'~/cloud.yaml'}
 export NODE_OS_DISTRO=${NODE_OS_DISTRO:-'ubuntu'}
 export NODE_HOSTNAME=${NODE_HOSTNAME:-'master'}
@@ -29,16 +29,15 @@ if [[ ${NODE_ENV} != '' ]]; then
 fi
 
 
-LIBVIRT_PATH=${LIBVIRT_PATH:-'/var/lib/libvirt/images'}
-if [ ! -d ${LIBVIRT_PATH} ]; then
-    sudo mkdir -p ${LIBVIRT_PATH} || (echo "Can not create ${LIBVIRT_PATH} directory" && exit 1)
+if [ ! -d ${NODE_ROOT} ]; then
+    sudo mkdir -p ${NODE_ROOT} || (echo "Can not create ${NODE_ROOT} directory" && exit 1)
 fi
 
 
 echo "Setup USERDATA: ${NODE_HOSTNAME} node..."
 
-USERDATA_DIR_PATH=${LIBVIRT_PATH}/${NODE_HOSTNAME}/nocloud
-CONFIG_DRIVE_PATH=${LIBVIRT_PATH}/${NODE_HOSTNAME}.iso
+USERDATA_DIR_PATH=${NODE_ROOT}/${NODE_HOSTNAME}/nocloud
+CONFIG_DRIVE_PATH=${NODE_ROOT}/${NODE_HOSTNAME}.iso
 if [ ! -d ${USERDATA_DIR_PATH} ]; then
     sudo mkdir -p ${USERDATA_DIR_PATH} || (echo "Can not create ${USERDATA_DIR_PATH} directory" && exit 1)
 fi
@@ -58,7 +57,7 @@ ethernets:
     nameservers:
       addresses: ["${NODE_DNS}"]
 EOF
-# sudo mkisofs -R -V config-2 -o ${CONFIG_DRIVE_PATH} ${LIBVIRT_PATH}/${NODE_HOSTNAME}
+# sudo mkisofs -R -V config-2 -o ${CONFIG_DRIVE_PATH} ${NODE_ROOT}/${NODE_HOSTNAME}
 sudo genisoimage -output ${CONFIG_DRIVE_PATH} -volid cidata -joliet -rock \
     ${USERDATA_DIR_PATH}/user-data \
     ${USERDATA_DIR_PATH}/meta-data \
@@ -67,15 +66,15 @@ USERDATA_DISK="--disk ${CONFIG_DRIVE_PATH},device=cdrom,perms=ro"
 
 echo "Creating: ${NODE_HOSTNAME} node..."
 
-if [ ! -f ${LIBVIRT_PATH}/${NODE_HOSTNAME}.qcow2 ]; then
-    sudo cp ${NODE_IMAGE} ${LIBVIRT_PATH}/${NODE_HOSTNAME}.qcow2
-    sudo qemu-img resize ${LIBVIRT_PATH}/${NODE_HOSTNAME}.qcow2 ${NODE_DISK}G
+if [ ! -f ${NODE_ROOT}/${NODE_HOSTNAME}.qcow2 ]; then
+    sudo cp ${NODE_IMAGE} ${NODE_ROOT}/${NODE_HOSTNAME}.qcow2
+    sudo qemu-img resize ${NODE_ROOT}/${NODE_HOSTNAME}.qcow2 ${NODE_DISK}G
 fi
 dev_index='b'
 additional_disk=''
 additional_disk_params=''
 for disk_size in ${NODE_ADDITIONAL_DISKS}; do
-    additional_disk=${LIBVIRT_PATH}/${NODE_HOSTNAME}-vd${dev_index}.img
+    additional_disk=${NODE_ROOT}/${NODE_HOSTNAME}-vd${dev_index}.img
     if [ ! -f ${additional_disk} ]; then
         sudo qemu-img create ${additional_disk} ${disk_size}G
     fi
@@ -91,7 +90,7 @@ sudo virt-install --connect qemu:///system \
              --network bridge=${NODE_NETWORK_HOST_BRIDGE} \
              --os-type=linux \
              --os-variant=virtio26 \
-             --disk path=${LIBVIRT_PATH}/${NODE_HOSTNAME}.qcow2,format=qcow2,bus=virtio \
+             --disk path=${NODE_ROOT}/${NODE_HOSTNAME}.qcow2,format=qcow2,bus=virtio \
              ${additional_disk_params} \
              ${USERDATA_DISK} \
              --vnc \

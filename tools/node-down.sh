@@ -9,8 +9,8 @@ if [[ ${NODE_ENV} != '' ]]; then
     source ${NODE_ENV}
 fi
 
-LIBVIRT_PATH=${LIBVIRT_PATH:-'/var/lib/libvirt/images'}
+NODE_ROOT=${NODE_ROOT:-'/var/vms'}
 
 sudo virsh destroy ${NODE_HOSTNAME}
 sudo virsh undefine ${NODE_HOSTNAME}
-sudo sh -c "rm -rf ${LIBVIRT_PATH}/${NODE_HOSTNAME}*"
+sudo sh -c "rm -rf ${NODE_ROOT}/${NODE_HOSTNAME}*"

@@ -4,7 +4,7 @@ env_dir=$(dirname "${BASH_SOURCE}")
 source ${env_dir}/common.sh
 
 export NODE_OS_DISTRO='ubuntu'
-export NODE_OS_CODENAME='bionic'
+export NODE_OS_CODENAME=${NODE_OS_CODENAME:-"bionic"}
 export NODE_OS_URL="http://cloud-images.ubuntu.com/${NODE_OS_CODENAME}/current/${NODE_OS_CODENAME}-server-cloudimg-amd64.img"
 export NODE_IMAGE_ORG=${NODE_IMAGE_ORG:-"${NODE_ROOT}/${NODE_OS_CODENAME}-server-cloudimg-amd64.img"}
 export NODE_IMAGE=${NODE_IMAGE:-"${NODE_ROOT}/${NODE_OS_CODENAME}-server-cloudimg-amd64.qcow2"}

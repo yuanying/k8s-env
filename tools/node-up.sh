@@ -51,7 +51,7 @@ version: 2
 ethernets:
   ${NODE_NET_DEVICE}:
     dhcp4: no
-    dhcp6: no
+    dhcp6: yes
     addresses: [${NODE_ADDRESS}/${NODE_NETWORK_RANGE}]
     gateway4: ${NODE_GATEWAY}
     nameservers:

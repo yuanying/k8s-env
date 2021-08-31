@@ -16,6 +16,7 @@ network:
 
 runcmd:
   - [ sh, -c, "echo '${NODE_ADDRESS}  ${NODE_HOSTNAME}' >> /etc/hosts"]
+  - [ sh, -c, "curl https://github.com/${NODE_GITHUB_USER}.keys >> /home/ubuntu/.ssh/authorized_keys" ]
 
 apt:
   sources:

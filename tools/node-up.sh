@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -eu
+set -eux
 export LC_ALL=C
 
 NODE_ENV=${1:-""}
@@ -88,8 +88,7 @@ sudo virt-install --connect qemu:///system \
              --ram ${NODE_MEMORY} \
              --vcpus ${NODE_CPU} \
              --network bridge=${NODE_NETWORK_HOST_BRIDGE} \
-             --os-type=linux \
-             --os-variant=virtio26 \
+             --os-variant=ubuntu22.04 \
              --disk path=${NODE_ROOT}/${NODE_HOSTNAME}.qcow2,format=qcow2,bus=virtio \
              ${additional_disk_params} \
              ${USERDATA_DISK} \

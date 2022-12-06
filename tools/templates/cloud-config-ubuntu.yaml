@@ -6,6 +6,8 @@ cat <<EOF
 #cloud-config
 ---
 hostname: ${NODE_HOSTNAME}
+# password: password
+# chpasswd: {expire: False}
 
 # Set SSH Key
 ssh_authorized_keys:

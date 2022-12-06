@@ -13,6 +13,8 @@ export NODE_NET_DEVICE='ens3'
 
 export NODE_ADDITIONAL_DISKS=''
 
+sudo mkdir -p ${NODE_ROOT}
+
 if [ ! -f ${NODE_IMAGE_ORG} ]; then
         sudo bash -c "wget ${NODE_OS_URL} -O - > ${NODE_IMAGE_ORG} || (rm -f ${NODE_IMAGE_ORG} && echo 'Failed to download image' && exit 1)"
 fi

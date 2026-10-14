@@ -74,7 +74,7 @@ Raspberry Pi 5（8GB、NVMe 起動）で Kubernetes v1.29.8 の control-plane（
 
 ## 出典
 
-- イメージ一覧: <https://cdimage.ubuntu.com/releases/24.04/release/>、<https://cdimage.ubuntu.com/releases/26.04/release/>、<https://cdimage.ubuntu.com/releases/20.04/release/>
+- イメージ一覧: <https://cdimage.ubuntu.com/ubuntu/releases/24.04/release/>、<https://cdimage.ubuntu.com/ubuntu/releases/26.04/release/>、<https://cdimage.ubuntu.com/ubuntu/releases/20.04/release/>
 - Raspberry Pi のサポート表と EEPROM の条件: <https://ubuntu.com/hardware/docs/boards/how-to/ubuntu_supported/raspberry-pi/>
 - 26.04 の変更点: <https://documentation.ubuntu.com/release-notes/26.04/summary-for-lts-users/>
 - 24.04 のリリースノート: <https://documentation.ubuntu.com/release-notes/24.04/>

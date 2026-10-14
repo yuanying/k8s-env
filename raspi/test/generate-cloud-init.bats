@@ -7,7 +7,24 @@ setup() {
   OUT="${BATS_TEST_TMPDIR}/out"
   # 呼び出し元の環境に左右されないよう、テンプレートが読む変数を消しておく
   unset NODE_HOSTNAME NODE_ADDRESS NODE_PUBLIC_KEY NODE_GITHUB_USER \
-        NODE_GATEWAY NODE_DNS NODE_NETWORK_RANGE NODE_NET_DEVICE
+        NODE_GATEWAY NODE_DNS NODE_NETWORK_RANGE NODE_NET_DEVICE \
+        NODE_AUTHORIZED_KEYS_FILE NODE_AUTHORIZED_KEYS_URL
+
+  # 生成時の鍵の取得をネットワークに出さないよう、curl を偽物に差し替える。
+  # 偽の curl は取得した URL を記録し、FAKE_KEYS の中身を返す
+  FAKE_BIN="${BATS_TEST_TMPDIR}/bin"
+  mkdir -p "${FAKE_BIN}"
+  export FAKE_KEYS="${BATS_TEST_TMPDIR}/fake-keys"
+  export CURL_LOG="${BATS_TEST_TMPDIR}/curl.log"
+  printf '%s\n' 'ssh-ed25519 AAAAGH1 gh-key-1' 'ssh-rsa AAAAGH2' > "${FAKE_KEYS}"
+  cat > "${FAKE_BIN}/curl" <<'EOS'
+#!/usr/bin/env bash
+echo "${@: -1}" >> "${CURL_LOG}"
+[[ -n ${FAKE_CURL_FAIL:-} ]] && exit 22
+cat "${FAKE_KEYS}"
+EOS
+  chmod +x "${FAKE_BIN}/curl"
+  export PATH="${FAKE_BIN}:${PATH}"
 }
 
 generate() {
@@ -74,9 +91,87 @@ nc() { yq -e "$1" "${OUT}/network-config"; }
   [ "$(ud '.users[0].ssh_authorized_keys[0]')" = "ssh-ed25519 AAAATEST test@example" ]
 }
 
-@test "NODE_PUBLIC_KEY が無ければ ssh_authorized_keys は書かない" {
-  generate "${RASPI_DIR}/envs/rasp01.sh" "${OUT}"
+@test "鍵の指定がすべて空なら ssh_authorized_keys は書かない" {
+  NODE_AUTHORIZED_KEYS_URL='' \
+    generate "${RASPI_DIR}/envs/rasp01.sh" "${OUT}"
   [ "$(yq '.users[0] | has("ssh_authorized_keys")' "${OUT}/user-data")" = "false" ]
+}
+
+@test "既定では生成時に GitHub の鍵を取得して authorized_keys に書き込む" {
+  generate "${RASPI_DIR}/envs/rasp01.sh" "${OUT}"
+  [ "$(cat "${CURL_LOG}")" = "https://github.com/yuanying.keys" ]
+  [ "$(ud '.users[0].ssh_authorized_keys | length')" = "2" ]
+  [ "$(ud '.users[0].ssh_authorized_keys[0]')" = "ssh-ed25519 AAAAGH1 gh-key-1" ]
+  [ "$(ud '.users[0].ssh_authorized_keys[1]')" = "ssh-rsa AAAAGH2" ]
+  # ssh_import_id も従来どおり残す
+  [ "$(ud '.users[0].ssh_import_id[0]')" = "gh:yuanying" ]
+}
+
+@test "取得先の既定は NODE_GITHUB_USER に従い、NODE_AUTHORIZED_KEYS_URL で差し替えられる" {
+  NODE_GITHUB_USER=someone generate "${RASPI_DIR}/envs/rasp01.sh" "${OUT}"
+  [ "$(tail -n1 "${CURL_LOG}")" = "https://github.com/someone.keys" ]
+
+  NODE_AUTHORIZED_KEYS_URL=https://example.com/keys generate "${RASPI_DIR}/envs/rasp01.sh" "${OUT}"
+  [ "$(tail -n1 "${CURL_LOG}")" = "https://example.com/keys" ]
+}
+
+@test "NODE_AUTHORIZED_KEYS_URL を空にすると取得しない" {
+  NODE_AUTHORIZED_KEYS_URL='' generate "${RASPI_DIR}/envs/rasp01.sh" "${OUT}"
+  [ ! -f "${CURL_LOG}" ]
+}
+
+@test "鍵の取得に失敗したら生成も失敗し、何も書かない" {
+  run env FAKE_CURL_FAIL=1 bash "${RASPI_DIR}/generate-cloud-init.sh" "${RASPI_DIR}/envs/rasp01.sh" "${OUT}"
+  [ "$status" -ne 0 ]
+  [[ "$output" == *github.com/yuanying.keys* ]]
+  [ ! -f "${OUT}/user-data" ]
+}
+
+@test "取得した中身に鍵が 1 本も無ければ失敗する" {
+  : > "${FAKE_KEYS}"
+  run bash "${RASPI_DIR}/generate-cloud-init.sh" "${RASPI_DIR}/envs/rasp01.sh" "${OUT}"
+  [ "$status" -ne 0 ]
+  [ ! -f "${OUT}/user-data" ]
+}
+
+@test "鍵に見えない行があれば失敗する（HTML のエラーページなどを書き込まない）" {
+  printf '%s\n' '<!DOCTYPE html>' '<html>' > "${FAKE_KEYS}"
+  run bash "${RASPI_DIR}/generate-cloud-init.sh" "${RASPI_DIR}/envs/rasp01.sh" "${OUT}"
+  [ "$status" -ne 0 ]
+  [[ "$output" == *DOCTYPE* ]]
+  [ ! -f "${OUT}/user-data" ]
+}
+
+@test "NODE_AUTHORIZED_KEYS_FILE の鍵を全部書き込む（空行・コメント行・CRLF・末尾改行なしを扱う）" {
+  keys="${BATS_TEST_TMPDIR}/keys"
+  printf '# 作業端末\n\nssh-ed25519 AAAAF1 me@laptop one\r\n   \n  # indented comment\necdsa-sha2-nistp256 AAAAF2 "quoted" it'"'"'s: #x\nsk-ssh-ed25519@openssh.com AAAAF3' > "${keys}"
+  NODE_AUTHORIZED_KEYS_URL='' NODE_AUTHORIZED_KEYS_FILE="${keys}" \
+    generate "${RASPI_DIR}/envs/rasp01.sh" "${OUT}"
+  [ "$(ud '.users[0].ssh_authorized_keys | length')" = "3" ]
+  [ "$(ud '.users[0].ssh_authorized_keys[0]')" = "ssh-ed25519 AAAAF1 me@laptop one" ]
+  [ "$(ud '.users[0].ssh_authorized_keys[1]')" = "ecdsa-sha2-nistp256 AAAAF2 \"quoted\" it's: #x" ]
+  [ "$(ud '.users[0].ssh_authorized_keys[2]')" = "sk-ssh-ed25519@openssh.com AAAAF3" ]
+  python3 -c 'import sys, yaml; yaml.safe_load(open(sys.argv[1]))' "${OUT}/user-data"
+}
+
+@test "NODE_AUTHORIZED_KEYS_FILE が読めなければ失敗する" {
+  run env NODE_AUTHORIZED_KEYS_FILE="${BATS_TEST_TMPDIR}/missing" \
+    bash "${RASPI_DIR}/generate-cloud-init.sh" "${RASPI_DIR}/envs/rasp01.sh" "${OUT}"
+  [ "$status" -ne 0 ]
+  [[ "$output" == *missing* ]]
+  [ ! -f "${OUT}/user-data" ]
+}
+
+@test "NODE_PUBLIC_KEY・ファイル・URL の鍵をこの順にまとめ、重複は 1 本にする" {
+  keys="${BATS_TEST_TMPDIR}/keys"
+  printf '%s\n' 'ssh-ed25519 AAAAF1 file' 'ssh-ed25519 AAAAGH1 gh-key-1' > "${keys}"
+  NODE_PUBLIC_KEY="ssh-ed25519 AAAAP1 pub" NODE_AUTHORIZED_KEYS_FILE="${keys}" \
+    generate "${RASPI_DIR}/envs/rasp01.sh" "${OUT}"
+  [ "$(ud '.users[0].ssh_authorized_keys | length')" = "4" ]
+  [ "$(ud '.users[0].ssh_authorized_keys[0]')" = "ssh-ed25519 AAAAP1 pub" ]
+  [ "$(ud '.users[0].ssh_authorized_keys[1]')" = "ssh-ed25519 AAAAF1 file" ]
+  [ "$(ud '.users[0].ssh_authorized_keys[2]')" = "ssh-ed25519 AAAAGH1 gh-key-1" ]
+  [ "$(ud '.users[0].ssh_authorized_keys[3]')" = "ssh-rsa AAAAGH2" ]
 }
 
 @test "porkadot が前提にする containerd を apt で入れる" {

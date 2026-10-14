@@ -73,3 +73,6 @@ tools/userdata/*.yaml
 private
 /configs*
 /templates/configs/*
+
+# raspi/generate-cloud-init.sh の出力先
+raspi/out/

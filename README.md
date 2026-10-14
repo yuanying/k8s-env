@@ -1,6 +1,8 @@
 # k8s-env
 Environment files for my k8s cluster
 
+-   [Raspberry Pi control-plane のセットアップ](raspi/README.md)
+
 Write config file like below:
 
 ```

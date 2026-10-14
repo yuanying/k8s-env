@@ -18,7 +18,7 @@ etcd メンバーの入れ替えや porkadot の操作は、この手順の範�
 | ホスト名 | rasp01〜03（検証機は任意） | 現行と同じ通称に揃える |
 | IPv4 | 192.168.1.111〜113/16 を固定で持つ。既定経路と DNS は 192.168.0.1 | porkadot の `porkadot.yaml` はノードを IP で引く |
 | IPv6 | ルーターの RA で SLAAC アドレスを取る | クラスタはデュアルスタック |
-| SSH | ユーザー `ubuntu` に GitHub（`gh:yuanying`）の公開鍵で入れる。パスワードログインは無効 | `porkadot.yaml` の control-plane は `connection: { user: ubuntu }` |
+| SSH | ユーザー `ubuntu` に GitHub（`gh:yuanying`）の公開鍵で入れる。鍵は生成時に `user-data` へ書き込むので、初回起動で GitHub に届かなくても入れる。パスワードログインは無効 | `porkadot.yaml` の control-plane は `connection: { user: ubuntu }` |
 | sudo | `ubuntu` はパスワードなしで sudo できる | porkadot は SSH 先で sudo して root で実行する |
 | containerd | Ubuntu の apt から入っている（どちらの OS でも 2.2 系） | porkadot は containerd を入れない。`setup-containerd` は設定を書くだけ |
 | memory cgroup | 有効（cgroup v2） | kubelet が必要とする |
@@ -54,8 +54,8 @@ etcd メンバーの入れ替えや porkadot の操作は、この手順の範�
 ## 3. OS イメージを NVMe SSD に書く
 
 1. イメージを取得し、同じディレクトリの `SHA256SUMS` で検証する。
-   - 24.04: `https://cdimage.ubuntu.com/releases/24.04/release/` の `ubuntu-24.04.5-preinstalled-server-arm64+raspi.img.xz`
-   - 26.04: `https://cdimage.ubuntu.com/releases/26.04/release/` の `ubuntu-26.04.1-preinstalled-server-arm64+raspi.img.xz`
+   - 24.04: `https://cdimage.ubuntu.com/ubuntu/releases/24.04/release/` の `ubuntu-24.04.5-preinstalled-server-arm64+raspi.img.xz`
+   - 26.04: `https://cdimage.ubuntu.com/ubuntu/releases/26.04/release/` の `ubuntu-26.04.1-preinstalled-server-arm64+raspi.img.xz`
    - 新しいポイントリリースが出ていればそれを使う。ポイントリリースのほうが更新済みの kernel と firmware を含むので、初回起動が確実になる。
 2. NVMe SSD に書く。
    - Imager で書く場合は「Use custom」でイメージを選ぶ。**Imager の OS カスタマイズ（ホスト名、ユーザー、SSH 鍵の設定）は使わない。**
@@ -68,14 +68,28 @@ etcd メンバーの入れ替えや porkadot の操作は、この手順の範�
    - 本番機: `bash raspi/generate-cloud-init.sh raspi/envs/rasp01.sh raspi/out/rasp01`（rasp02 / rasp03 も同様）
    - 本番投入前の単体検証機: ホスト名と仮の空きアドレスを環境変数で渡す。
      `NODE_HOSTNAME=rasp-verify NODE_ADDRESS=192.168.1.<空き> bash raspi/generate-cloud-init.sh raspi/envs/verify.sh raspi/out/verify`
-   - 追加の公開鍵を入れたいときは `NODE_PUBLIC_KEY` に鍵の 1 行を渡す。GitHub の鍵は常に入る。
+   - 生成時に `https://github.com/yuanying.keys` から公開鍵を取得し、全部を `user-data` に書き込む。
+     取得に失敗したとき、鍵が 1 本も無いとき、鍵に見えない行が混じっていたときは、生成自体が失敗する。
+     生成にはインターネットにつながった作業端末が要る。
+   - 公開鍵の渡し方は次の 3 つで、併用できる。重複は 1 本にまとめる。
+
+     | 環境変数 | 中身 | 既定値 |
+     |---|---|---|
+     | `NODE_AUTHORIZED_KEYS_URL` | 生成時に取得する鍵の URL。空にすると取得しない | `https://github.com/${NODE_GITHUB_USER}.keys` |
+     | `NODE_AUTHORIZED_KEYS_FILE` | 鍵のファイル。1 行 1 鍵、空行と `#` で始まる行は無視する | なし |
+     | `NODE_PUBLIC_KEY` | 鍵 1 行 | なし |
+
+     例: GitHub に無い鍵を足す場合は `NODE_AUTHORIZED_KEYS_FILE=~/.ssh/extra.pub bash raspi/generate-cloud-init.sh ...`、
+     GitHub から取らずにファイルの鍵だけにする場合はさらに `NODE_AUTHORIZED_KEYS_URL=` を付ける。
+   - これとは別に、初回起動時に cloud-init が `ssh_import_id`（`gh:yuanying`）で GitHub の鍵を取りに行く。
+     GitHub に届けば、生成後に GitHub へ足した鍵もここで入る。届かなくても、書き込み済みの鍵で入れる。
 2. 書き込んだ NVMe SSD の boot パーティション（FAT、ラベル `system-boot`）をマウントし、生成した `user-data` と `network-config` で
    既存の同名ファイルを上書きする。`meta-data` はイメージのものをそのまま残す。
    - boot パーティションの場所は 24.04 / 26.04 で同じ。cloud-init は常にここを読む。
 
 生成される設定の中身:
 
-- `user-data`: ホスト名、タイムゾーン（Asia/Tokyo）、`ubuntu` ユーザー（GitHub の鍵、NOPASSWD sudo、パスワードはロック）、
+- `user-data`: ホスト名、タイムゾーン（Asia/Tokyo）、`ubuntu` ユーザー（生成時に書き込んだ鍵と `ssh_import_id`、NOPASSWD sudo、パスワードはロック）、
   `apt update` / `apt upgrade`、`containerd` の導入、memory cgroup の確認、最後に再起動
 - `network-config`: `eth0` に IPv4 を固定で付け、既定経路と DNS をルーター（192.168.0.1）に向ける。IPv6 は RA を受ける
 - memory cgroup: Ubuntu の Raspberry Pi 向け kernel は既定で有効にしているので、通常は何もしない。

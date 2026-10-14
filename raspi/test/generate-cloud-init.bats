@@ -84,10 +84,42 @@ nc() { yq -e "$1" "${OUT}/network-config"; }
   yq -e '.packages[] | select(. == "containerd")' "${OUT}/user-data" > /dev/null
 }
 
-@test "kernel cmdline に memory cgroup の有効化を冪等に足す" {
+@test "memory controller が無いときだけ cmdline に cgroup_enable=memory を足す（24.04 / 26.04 の両配置）" {
   generate "${RASPI_DIR}/envs/rasp01.sh" "${OUT}"
   grep -q 'cgroup_enable=memory' "${OUT}/user-data"
+  grep -q '/sys/fs/cgroup/cgroup.controllers' "${OUT}/user-data"
+  # 26.04 は A/B ブートで current/ 配下、24.04 は直下
+  grep -q '/boot/firmware/current/cmdline.txt' "${OUT}/user-data"
   grep -q '/boot/firmware/cmdline.txt' "${OUT}/user-data"
+  # cgroup_memory=1 は現行 kernel では認識されない
+  ! grep -q 'cgroup_memory=1' "${OUT}/user-data"
+}
+
+@test "cmdline の追記処理は memory が無いときだけ、実在する cmdline.txt に 1 回だけ足す" {
+  generate "${RASPI_DIR}/envs/rasp01.sh" "${OUT}"
+  script=$(yq -e '.write_files[] | select(.path == "/usr/local/sbin/enable-memory-cgroup") | .content' "${OUT}/user-data")
+  root="${BATS_TEST_TMPDIR}/root"
+
+  # 26.04 配置、memory 無し → current/ に追記、2 回目は何もしない
+  mkdir -p "${root}/boot/firmware/current" "${root}/sys/fs/cgroup"
+  echo 'console=tty1 root=LABEL=writable rootwait' > "${root}/boot/firmware/current/cmdline.txt"
+  echo 'cpuset cpu io pids' > "${root}/sys/fs/cgroup/cgroup.controllers"
+  ROOT="${root}" bash -c "${script}"
+  ROOT="${root}" bash -c "${script}"
+  [ "$(cat "${root}/boot/firmware/current/cmdline.txt")" = "console=tty1 root=LABEL=writable rootwait cgroup_enable=memory" ]
+
+  # 24.04 配置、memory 有り → 触らない
+  root2="${BATS_TEST_TMPDIR}/root2"
+  mkdir -p "${root2}/boot/firmware" "${root2}/sys/fs/cgroup"
+  echo 'console=tty1 rootwait' > "${root2}/boot/firmware/cmdline.txt"
+  echo 'cpuset cpu io memory pids' > "${root2}/sys/fs/cgroup/cgroup.controllers"
+  ROOT="${root2}" bash -c "${script}"
+  [ "$(cat "${root2}/boot/firmware/cmdline.txt")" = "console=tty1 rootwait" ]
+
+  # 24.04 配置、memory 無し → 直下に追記
+  echo 'cpuset cpu io pids' > "${root2}/sys/fs/cgroup/cgroup.controllers"
+  ROOT="${root2}" bash -c "${script}"
+  [ "$(cat "${root2}/boot/firmware/cmdline.txt")" = "console=tty1 rootwait cgroup_enable=memory" ]
 }
 
 @test "初回起動の最後に再起動する（cmdline とパッケージ更新を反映させる）" {

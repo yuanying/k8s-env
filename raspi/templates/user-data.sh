@@ -33,9 +33,29 @@ package_upgrade: true
 packages:
 - containerd
 
+write_files:
+# Ubuntu の linux-raspi は memory cgroup を既定で有効にしている（LP #2017209）。
+# 無効だったときだけ cmdline に足す。cmdline.txt は 24.04 が直下、26.04 は A/B ブートの current/ にある
+- path: /usr/local/sbin/enable-memory-cgroup
+  permissions: "0755"
+  content: |
+    #!/bin/bash
+    set -eu
+    ROOT=\${ROOT:-}
+    if grep -qw memory \${ROOT}/sys/fs/cgroup/cgroup.controllers; then
+        exit 0
+    fi
+    for cmdline in \${ROOT}/boot/firmware/current/cmdline.txt \${ROOT}/boot/firmware/cmdline.txt; do
+        if [[ -f \${cmdline} ]]; then
+            grep -qw 'cgroup_enable=memory' \${cmdline} || sed -i '1 s/\$/ cgroup_enable=memory/' \${cmdline}
+            exit 0
+        fi
+    done
+    echo "cmdline.txt not found" >&2
+    exit 1
+
 runcmd:
-# memory cgroup を有効にする。Raspberry Pi の kernel は既定で無効にしている
-- [ sh, -c, "grep -q 'cgroup_enable=memory' /boot/firmware/cmdline.txt || sed -i '1 s/\$/ cgroup_enable=memory cgroup_memory=1/' /boot/firmware/cmdline.txt" ]
+- [ /usr/local/sbin/enable-memory-cgroup ]
 
 # cmdline と kernel の更新を反映させる
 power_state:

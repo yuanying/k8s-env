@@ -2,11 +2,44 @@
 set -eu
 export LC_ALL=C
 
+# NODE_PUBLIC_KEY、NODE_AUTHORIZED_KEYS_FILE、NODE_AUTHORIZED_KEYS_URL の順に鍵を集める
+raw_keys="${NODE_PUBLIC_KEY:-}"
+if [[ -n ${NODE_AUTHORIZED_KEYS_FILE:-} ]]; then
+    if [[ ! -r ${NODE_AUTHORIZED_KEYS_FILE} ]]; then
+        echo "cannot read NODE_AUTHORIZED_KEYS_FILE: ${NODE_AUTHORIZED_KEYS_FILE}" >&2
+        exit 1
+    fi
+    raw_keys+=$'\n'$(cat "${NODE_AUTHORIZED_KEYS_FILE}")
+fi
+if [[ -n ${NODE_AUTHORIZED_KEYS_URL:-} ]]; then
+    if ! fetched=$(curl -fsSL "${NODE_AUTHORIZED_KEYS_URL}"); then
+        echo "failed to fetch keys from ${NODE_AUTHORIZED_KEYS_URL}" >&2
+        exit 1
+    fi
+    if ! grep -q '[^[:space:]]' <<< "${fetched}"; then
+        echo "no keys found at ${NODE_AUTHORIZED_KEYS_URL}" >&2
+        exit 1
+    fi
+    raw_keys+=$'\n'${fetched}
+fi
+
+# 空行とコメント行を除き、前後の空白と CR を落とし、重複を除いて YAML の単一引用符で書く
 authorized_keys=''
-if [[ -n ${NODE_PUBLIC_KEY} ]]; then
-    authorized_keys="
-  ssh_authorized_keys:
-  - ${NODE_PUBLIC_KEY}"
+declare -A seen=()
+while IFS= read -r key || [[ -n ${key} ]]; do
+    key=${key%$'\r'}
+    key=$(sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' <<< "${key}")
+    [[ -z ${key} || ${key} == '#'* ]] && continue
+    if [[ ! ${key} =~ ^(ssh-|ecdsa-|sk-) ]]; then
+        echo "not a public key: ${key}" >&2
+        exit 1
+    fi
+    [[ -n ${seen[${key}]:-} ]] && continue
+    seen[${key}]=1
+    authorized_keys+=$'\n'"  - '${key//\'/\'\'}'"
+done <<< "${raw_keys}"
+if [[ -n ${authorized_keys} ]]; then
+    authorized_keys=$'\n'"  ssh_authorized_keys:${authorized_keys}"
 fi
 
 cat <<EOS

@@ -20,7 +20,7 @@ etcd メンバーの入れ替えや porkadot の操作は、この手順の範�
 | IPv6 | ルーターの RA で SLAAC アドレスを取る | クラスタはデュアルスタック |
 | SSH | ユーザー `ubuntu` に GitHub（`gh:yuanying`）の公開鍵で入れる。鍵は生成時に `user-data` へ書き込むので、初回起動で GitHub に届かなくても入れる。パスワードログインは無効 | `porkadot.yaml` の control-plane は `connection: { user: ubuntu }` |
 | sudo | `ubuntu` はパスワードなしで sudo できる | porkadot は SSH 先で sudo して root で実行する |
-| containerd | Ubuntu の apt から入っている（どちらの OS でも 2.2 系） | porkadot は containerd を入れない。`setup-containerd` は設定を書くだけ |
+| containerd | Docker の apt リポジトリの `containerd.io` が入り、apt の pin で 2.3 系に固定されている。`/etc/containerd/config.toml` は `containerd.io` が置いたまま（CRI が無効） | porkadot は containerd を入れない。`setup-containerd` は設定を書くだけ。Ubuntu の `containerd` は 24.04・26.04 とも 2.2 系で、2.3 系が無い |
 | memory cgroup | 有効（cgroup v2） | kubelet が必要とする |
 | パッケージ | 初回起動時に `apt upgrade` 済み | — |
 
@@ -90,7 +90,12 @@ etcd メンバーの入れ替えや porkadot の操作は、この手順の範�
 生成される設定の中身:
 
 - `user-data`: ホスト名、タイムゾーン（Asia/Tokyo）、`ubuntu` ユーザー（生成時に書き込んだ鍵と `ssh_import_id`、NOPASSWD sudo、パスワードはロック）、
-  `apt update` / `apt upgrade`、`containerd` の導入、memory cgroup の確認、最後に再起動
+  Docker の apt リポジトリと `containerd.io` の pin、`apt update` / `apt upgrade`、`containerd.io` の導入、memory cgroup の確認、最後に再起動
+- Docker のリポジトリ: `deb [arch=arm64 signed-by=$KEY_FILE] https://download.docker.com/linux/ubuntu $RELEASE stable`。
+  `$RELEASE` は cloud-init が OS の codename（24.04 は `noble`、26.04 は `resolute`）に置き換える。
+  鍵は指紋 `9DC858229FC7DD38854AE2D88D81803C0EBFCD88` で keyserver.ubuntu.com から取り、このリポジトリにだけ使う
+- `containerd.io` の pin: `/etc/apt/preferences.d/containerd-io` に `Package: containerd.io`、`Pin: version 2.3.*`、`Pin-Priority: 1001`。
+  pin しないと `apt upgrade` で 2.4 系に上がる。系列は env の `NODE_CONTAINERD_SERIES`（既定 `2.3`、`<major>.<minor>` の形）で変えられる
 - `network-config`: `eth0` に IPv4 を固定で付け、既定経路と DNS をルーター（192.168.0.1）に向ける。IPv6 は RA を受ける
 - memory cgroup: Ubuntu の Raspberry Pi 向け kernel は既定で有効にしているので、通常は何もしない。
   初回起動の時点で無効だった場合に限り、kernel の cmdline に `cgroup_enable=memory` を足す。
@@ -117,7 +122,8 @@ etcd メンバーの入れ替えや porkadot の操作は、この手順の範�
 | NVMe から起動しているか | `findmnt /` | `/dev/nvme0n1p2` |
 | パスワードなしで sudo できるか | `sudo -n true` | 何も出ずに終わる |
 | cgroup v2 と memory controller | `stat -fc %T /sys/fs/cgroup`、`cat /sys/fs/cgroup/cgroup.controllers` | `cgroup2fs`、`memory` を含む |
-| containerd | `containerd --version`、`systemctl is-active containerd` | 2.2 系、`active` |
+| containerd | `containerd --version`、`runc --version`、`systemctl is-active containerd` | 2.3 系、runc 1.5 系、`active` |
+| containerd.io の pin | `apt-cache policy containerd.io` | Candidate が 2.3 系（2.4 系ではない） |
 | swap が無いか | `swapon --show` | 何も出ない |
 | ページサイズ | `getconf PAGESIZE` | `4096`（Ubuntu の kernel は 4K ページ。Raspberry Pi OS の Pi 5 向け kernel は 16K なので混同しない） |
 | 時刻同期 | `timedatectl` | `System clock synchronized: yes` |
@@ -127,9 +133,21 @@ etcd メンバーの入れ替えや porkadot の操作は、この手順の範�
 
 ## 7. 次の工程に渡す前の注意
 
-- **containerd は 2.2 系が入る。** 24.04 でも noble-updates の containerd は 2026-04 に 1.7 系から 2.2 系へ上がっている。
-  porkadot の `setup-containerd` が containerd 2.x の config（version 3）に対応するまでは、`setup-containerd` を流しても
-  `SystemdCgroup = true` が効かない。porkadot 側の対応（refactoring01/09）が入った版を使うこと。
+- **`setup-containerd` は porkadot 0.29.2 以降を使う。** 0.29.2 は containerd 2.3 と config の version 4 に対応している。
+- **config.toml は `setup-containerd` が作り直す。** cloud-init の段では、`containerd.io` が置いた `disabled_plugins = ["cri"]` の
+  config（version の行が無い）のまま containerd が動く。CRI が無効なので、このままでは kubelet は動かない。
+  `setup-containerd` は version の行が無い config を `config.toml.porkadot-bak.<日時>` に控えてから `containerd config default` で作り直し、
+  `SystemdCgroup = true` を足す。containerd 2.3 の `config default` は **version 4** なので、この機体の config は version 4 になる
+  （containerd.io 2.3.6 の config と porkadot 0.29.2 の `setup-containerd` で確かめた）。
+  - cloud-init で version 3 の config を作らないのは、containerd 2.3 には version 3 の既定値を出す手段が無く、手で書いた config は
+    他のノードの config（containerd 2.2.1 の `config default` から作ったもの）とも結局そろわないからである。
+    計画では全台の config を version 4 の 2.3 の既定値に作り直す予定で、この機体はそれを先取りした形になる。
+    2.3 は version 3 も 4 も読むので、version が混在しても動作には差し支えない。
+  - 他の control-plane の config（version 3）にそろえたいときは、`setup-containerd` の前にその config を `/etc/containerd/config.toml` に
+    コピーしておく。`setup-containerd` は version の行がある config を作り直さず、`SystemdCgroup` だけを確かめる。
+- **`containerd.io` のパッチは自動では上がらない。** unattended-upgrades は Docker の origin を対象にしないので、2.3 系のパッチは
+  手で上げる（`apt-get install -o Dpkg::Options::=--force-confold containerd.io`。作り直した config.toml を `containerd.io` の
+  conffile で上書きさせないため）。2.3 系の次の系列へ移るときは、`/etc/apt/preferences.d/containerd-io` の pin を書き換える。
 - 26.04 は `sudo` が sudo-rs、coreutils が Rust 版に変わっている。porkadot は sudo とシェルスクリプトでノードを設定するので、
   26.04 を選ぶ場合は検証機で `setup-node` から `install kubelet` まで通ることを先に確かめる。
 
@@ -147,5 +165,5 @@ boot パーティションの `user-data` で初期設定した、と推定し�
   Docker の apt リポジトリから `containerd.io` を入れたとみられる
 
 確かめるには、旧機体で `/boot/firmware/user-data`、`/boot/firmware/cmdline.txt`、`/etc/netplan/`、`apt-cache policy containerd.io` を見る。
-新しい機体では Docker のリポジトリを使わず、Ubuntu の `containerd` を使う。
-Ubuntu の版で 2.x が手に入り、apt の追加リポジトリを管理しなくて済むからである。
+新しい機体でも、Docker のリポジトリの `containerd.io` を使う。一時は Ubuntu の `containerd`（2.2 系）を使っていたが、
+Ubuntu には 2.3 系が無く、K8s の更新の計画で containerd を 2.3 系（LTS）にそろえることにしたためである。

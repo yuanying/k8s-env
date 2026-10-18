@@ -8,7 +8,7 @@ setup() {
   # 呼び出し元の環境に左右されないよう、テンプレートが読む変数を消しておく
   unset NODE_HOSTNAME NODE_ADDRESS NODE_PUBLIC_KEY NODE_GITHUB_USER \
         NODE_GATEWAY NODE_DNS NODE_NETWORK_RANGE NODE_NET_DEVICE \
-        NODE_AUTHORIZED_KEYS_FILE NODE_AUTHORIZED_KEYS_URL
+        NODE_AUTHORIZED_KEYS_FILE NODE_AUTHORIZED_KEYS_URL NODE_CONTAINERD_SERIES
 
   # 生成時の鍵の取得をネットワークに出さないよう、curl を偽物に差し替える。
   # 偽の curl は取得した URL を記録し、FAKE_KEYS の中身を返す
@@ -174,9 +174,43 @@ nc() { yq -e "$1" "${OUT}/network-config"; }
   [ "$(ud '.users[0].ssh_authorized_keys[3]')" = "ssh-rsa AAAAGH2" ]
 }
 
-@test "porkadot が前提にする containerd を apt で入れる" {
+@test "porkadot が前提にする containerd は Docker の containerd.io を入れ、Ubuntu の containerd は入れない" {
   generate "${RASPI_DIR}/envs/rasp01.sh" "${OUT}"
-  yq -e '.packages[] | select(. == "containerd")' "${OUT}/user-data" > /dev/null
+  yq -e '.packages[] | select(. == "containerd.io")' "${OUT}/user-data" > /dev/null
+  [ "$(yq '[.packages[] | select(. == "containerd" or . == "runc")] | length' "${OUT}/user-data")" = "0" ]
+}
+
+@test "Docker の arm64 のリポジトリを、OS の codename と固定した鍵の指紋で足す" {
+  generate "${RASPI_DIR}/envs/rasp01.sh" "${OUT}"
+  # $RELEASE と $KEY_FILE は cloud-init が初回起動時に置き換える
+  [ "$(ud '.apt.sources.docker.source')" = 'deb [arch=arm64 signed-by=$KEY_FILE] https://download.docker.com/linux/ubuntu $RELEASE stable' ]
+  [ "$(ud '.apt.sources.docker.keyid')" = "9DC858229FC7DD38854AE2D88D81803C0EBFCD88" ]
+  [ "$(ud '.apt.sources.docker.keyserver')" = "keyserver.ubuntu.com" ]
+}
+
+@test "containerd.io を既定で 2.3 系に pin する" {
+  generate "${RASPI_DIR}/envs/rasp01.sh" "${OUT}"
+  pin=$(ud '.write_files[] | select(.path == "/etc/apt/preferences.d/containerd-io") | .content')
+  [ "${pin}" = $'Package: containerd.io\nPin: version 2.3.*\nPin-Priority: 1001' ]
+}
+
+@test "pin する系列は NODE_CONTAINERD_SERIES で変えられる" {
+  NODE_CONTAINERD_SERIES=2.4 generate "${RASPI_DIR}/envs/rasp01.sh" "${OUT}"
+  ud '.write_files[] | select(.path == "/etc/apt/preferences.d/containerd-io") | .content' | grep -qx 'Pin: version 2.4.\*'
+}
+
+@test "NODE_CONTAINERD_SERIES が <major>.<minor> でなければ失敗する" {
+  for series in 2 2.3.6 '2.*' 'v2.3'; do
+    run env NODE_CONTAINERD_SERIES="${series}" bash "${RASPI_DIR}/generate-cloud-init.sh" "${RASPI_DIR}/envs/rasp01.sh" "${OUT}"
+    [ "$status" -ne 0 ]
+    [[ "$output" == *NODE_CONTAINERD_SERIES* ]]
+    [ ! -f "${OUT}/user-data" ]
+  done
+}
+
+@test "containerd の config.toml は置かない（porkadot の setup-containerd が作り直す）" {
+  generate "${RASPI_DIR}/envs/rasp01.sh" "${OUT}"
+  [ "$(yq '[.write_files[] | select(.path == "/etc/containerd/config.toml")] | length' "${OUT}/user-data")" = "0" ]
 }
 
 @test "memory controller が無いときだけ cmdline に cgroup_enable=memory を足す（24.04 / 26.04 の両配置）" {

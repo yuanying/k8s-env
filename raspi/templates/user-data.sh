@@ -2,6 +2,11 @@
 set -eu
 export LC_ALL=C
 
+if [[ ! ${NODE_CONTAINERD_SERIES:-} =~ ^[0-9]+\.[0-9]+$ ]]; then
+    echo "NODE_CONTAINERD_SERIES must be <major>.<minor> (e.g. 2.3): '${NODE_CONTAINERD_SERIES:-}'" >&2
+    exit 1
+fi
+
 # NODE_PUBLIC_KEY、NODE_AUTHORIZED_KEYS_FILE、NODE_AUTHORIZED_KEYS_URL の順に鍵を集める
 raw_keys="${NODE_PUBLIC_KEY:-}"
 if [[ -n ${NODE_AUTHORIZED_KEYS_FILE:-} ]]; then
@@ -60,13 +65,30 @@ users:
   - gh:${NODE_GITHUB_USER}${authorized_keys}
 ssh_pwauth: false
 
+# containerd は Docker の containerd.io を入れる。Ubuntu の containerd には新しい系列が無い。
+# \$RELEASE は OS の codename、\$KEY_FILE は keyid の鍵の置き場所で、cloud-init が置き換える
+apt:
+  sources:
+    docker:
+      keyid: "9DC858229FC7DD38854AE2D88D81803C0EBFCD88"
+      keyserver: "keyserver.ubuntu.com"
+      source: "deb [arch=arm64 signed-by=\$KEY_FILE] https://download.docker.com/linux/ubuntu \$RELEASE stable"
+
 package_update: true
 package_upgrade: true
-# porkadot は containerd を入れない（setup-containerd は設定を書くだけ）
+# porkadot は containerd を入れない（setup-containerd は設定を書くだけ）。
+# containerd.io が置く config.toml（disabled_plugins = ["cri"]、version の行が無い）は、
+# setup-containerd が控えを取って containerd config default から作り直すので、ここでは置かない
 packages:
-- containerd
+- containerd.io
 
 write_files:
+# pin しないと apt upgrade で次の系列に上がる。write_files はパッケージの導入より前に走る
+- path: /etc/apt/preferences.d/containerd-io
+  content: |
+    Package: containerd.io
+    Pin: version ${NODE_CONTAINERD_SERIES}.*
+    Pin-Priority: 1001
 # Ubuntu の linux-raspi は memory cgroup を既定で有効にしている（LP #2017209）。
 # 無効だったときだけ cmdline に足す。cmdline.txt は 24.04 が直下、26.04 は A/B ブートの current/ にある
 - path: /usr/local/sbin/enable-memory-cgroup

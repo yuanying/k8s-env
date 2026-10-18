@@ -6,6 +6,8 @@ export NODE_NETWORK_RANGE=${NODE_NETWORK_RANGE:-'16'}
 export NODE_GATEWAY=${NODE_GATEWAY:-'192.168.0.1'}
 export NODE_DNS=${NODE_DNS:-'192.168.0.1'}
 export NODE_NET_DEVICE=${NODE_NET_DEVICE:-'eth0'}
+# Docker の apt リポジトリから入れる containerd.io を pin する系列（<major>.<minor>）
+export NODE_CONTAINERD_SERIES=${NODE_CONTAINERD_SERIES:-'2.3'}
 # 以下の鍵は生成時に user-data の ssh_authorized_keys へ直接書き込む。
 # ssh_import_id は初回起動時に GitHub へ取りに行くので、届かないと入れなくなる。それに備える
 # 追加の公開鍵 1 本（任意）

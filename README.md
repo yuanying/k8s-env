@@ -73,10 +73,6 @@ owncloud:
 
 ingress:
   proxy_real_ip_cidr: "172.18.0.0/16"
-  tcp:
-    25: "mail/ma0-mailserver:25"
-    587: "mail/ma0-mailserver:587"
-    993: "mail/ma0-mailserver:993"
 
 domains:
   fraction.jp:

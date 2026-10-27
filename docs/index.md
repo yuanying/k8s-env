@@ -3,7 +3,6 @@
 -   [Setup hosts](hosts.md)
 -   [Install helm](helm.md)
 -   [Install CoreDNS](coredns.md)
--   [Install Rook](rook.md)
 -   [Install GlusterFS](glusterfs.md)
 -   [Install Nginx Ingress Controller](ingress.md)
 -   [Install HackMD](hackmd.md)
